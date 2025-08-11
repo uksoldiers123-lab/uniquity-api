@@ -7,7 +7,7 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 
-// Stripe is optional until you add keys in Render
+// Optional: Stripe (only used after you add keys in Render)
 let stripe = null;
 if (process.env.STRIPE_SECRET) {
   const Stripe = require('stripe');
@@ -23,6 +23,16 @@ const pool = new Pool({
 });
 const q = (text, params) => pool.query(text, params);
 
+/* Helpers */
+function errJson(res, code, msg, err) {
+  // During debugging you can set DEBUG_ERRORS=true in Render env to see details
+  const body = { error: msg };
+  if (process.env.DEBUG_ERRORS === 'true' && err) {
+    body.detail = String(err.message || err);
+  }
+  return res.status(code).json(body);
+}
+
 /* Stripe webhook (raw body) — mount BEFORE express.json() */
 app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) {
@@ -37,9 +47,8 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
       const meta = pi.metadata || {};
       const companyId = meta.companyId || null;
 
-      // Record payment
       await q(
-        `insert into payments
+        `insert into public.payments
           (company_id, provider, provider_payment_id, charge_id, invoice_number,
            amount_cents, currency, fee_cents, net_cents, status, metadata)
          values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
@@ -59,22 +68,19 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
         ]
       );
 
-      // Earmark 70% transfer
       if (companyId) {
-        const { rows } = await q('select payout_percent from companies where id=$1', [companyId]);
+        const { rows } = await q('select payout_percent from public.companies where id=$1', [companyId]);
         const pct = rows[0]?.payout_percent ?? 0.70;
         const toCompany = Math.round(pi.amount * pct);
 
         await q(
-          `insert into transfers (company_id, payment_id, provider, amount_cents, status)
-           values ($1, (select id from payments where provider=$2 and provider_payment_id=$3), $4, 'queued')
+          `insert into public.transfers (company_id, payment_id, provider, amount_cents, status)
+           values ($1, (select id from public.payments where provider=$2 and provider_payment_id=$3), $4, 'queued')
            on conflict do nothing`,
           [companyId, 'stripe', pi.id, toCompany]
         );
       }
     }
-
-    // Optional: handle charge.refunded for reversals
 
     return res.json({ received: true });
   } catch (err) {
@@ -101,18 +107,19 @@ app.use(
   })
 );
 
-/* API key middleware — verify in Postgres using crypt() */
+/* API key middleware — verify in Postgres using crypt() and schema-qualified tables */
 async function verifyApiKey(req, res, next) {
   const raw = req.get('X-API-Key');
-  if (!raw) return res.status(401).json({ error: 'Missing API key' });
+  if (!raw) return errJson(res, 401, 'Missing API key');
 
   const prefix = raw.slice(0, 14);
   try {
+    // Ensure pgcrypto is available in DB; the crypt() function comes from it.
     const { rows } = await q(
       `
       select c.id as company_id, c.name, c.slug, c.payout_percent
-      from api_keys ak
-      join companies c on c.id = ak.company_id
+      from public.api_keys ak
+      join public.companies c on c.id = ak.company_id
       where ak.key_prefix = $1
         and ak.status = 'active'
         and crypt($2, ak.key_hash) = ak.key_hash
@@ -122,7 +129,7 @@ async function verifyApiKey(req, res, next) {
     );
 
     const row = rows[0];
-    if (!row) return res.status(401).json({ error: 'Invalid API key' });
+    if (!row) return errJson(res, 401, 'Invalid API key');
 
     req.company = {
       id: row.company_id,
@@ -130,11 +137,11 @@ async function verifyApiKey(req, res, next) {
       slug: row.slug,
       payout_percent: row.payout_percent
     };
-    await q('update api_keys set last_used_at = now() where key_prefix = $1', [prefix]);
+    await q('update public.api_keys set last_used_at = now() where key_prefix = $1', [prefix]);
     return next();
   } catch (err) {
     console.error('verifyApiKey DB error:', err);
-    return res.status(500).json({ error: 'Server error' });
+    return errJson(res, 500, 'Server error', err);
   }
 }
 
@@ -144,13 +151,13 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 /* Create Checkout Session (real payments; needs Stripe keys) */
 app.post('/api/checkout', verifyApiKey, async (req, res) => {
   if (!stripe || !process.env.STRIPE_SECRET) {
-    return res.status(501).json({ error: 'Stripe not configured yet. Use /api/dev/mock-payment to simulate.' });
+    return errJson(res, 501, 'Stripe not configured yet. Use /api/dev/mock-payment to simulate.');
   }
 
   try {
     const { amount, currency = 'usd', invoiceNumber, payerEmail, payerName, memo } = req.body || {};
     if (!amount || !invoiceNumber || !payerEmail) {
-      return res.status(400).json({ error: 'Missing required fields: amount, invoiceNumber, payerEmail' });
+      return errJson(res, 400, 'Missing required fields: amount, invoiceNumber, payerEmail');
     }
 
     const successUrl =
@@ -190,7 +197,7 @@ app.post('/api/checkout', verifyApiKey, async (req, res) => {
     return res.json({ url: session.url });
   } catch (err) {
     console.error('Create checkout error:', err);
-    return res.status(500).json({ error: 'Could not create checkout' });
+    return errJson(res, 500, 'Could not create checkout', err);
   }
 });
 
@@ -199,13 +206,13 @@ app.post('/api/dev/mock-payment', verifyApiKey, async (req, res) => {
   try {
     const { amount, currency = 'usd', invoiceNumber } = req.body || {};
     if (!amount || !invoiceNumber) {
-      return res.status(400).json({ error: 'Missing amount or invoiceNumber' });
+      return errJson(res, 400, 'Missing amount or invoiceNumber');
     }
 
     const pid = 'mock_pi_' + Math.random().toString(36).slice(2);
 
     await q(
-      `insert into payments
+      `insert into public.payments
         (company_id, provider, provider_payment_id, charge_id, invoice_number,
          amount_cents, currency, fee_cents, net_cents, status, metadata)
        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
@@ -224,20 +231,20 @@ app.post('/api/dev/mock-payment', verifyApiKey, async (req, res) => {
       ]
     );
 
-    const { rows } = await q('select payout_percent from companies where id=$1', [req.company.id]);
+    const { rows } = await q('select payout_percent from public.companies where id=$1', [req.company.id]);
     const pct = rows[0]?.payout_percent ?? 0.70;
     const toCompany = Math.round(Number(amount) * 100 * pct);
 
     await q(
-      `insert into transfers (company_id, payment_id, provider, amount_cents, status)
-       values ($1, (select id from payments where provider=$2 and provider_payment_id=$3), $4, 'queued')`,
+      `insert into public.transfers (company_id, payment_id, provider, amount_cents, status)
+       values ($1, (select id from public.payments where provider=$2 and provider_payment_id=$3), $4, 'queued')`,
       [req.company.id, 'mock', pid, toCompany]
     );
 
     return res.json({ ok: true, provider_payment_id: pid, transfer_cents: toCompany });
   } catch (err) {
     console.error('Mock payment error:', err);
-    return res.status(500).json({ error: 'Mock insert failed' });
+    return errJson(res, 500, 'Mock insert failed', err);
   }
 });
 
@@ -246,4 +253,3 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log('Uniquity API listening on :' + port);
 });
-
