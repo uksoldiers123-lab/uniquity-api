@@ -1,14 +1,13 @@
-
 'use strict';
 
 require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');          // pure JS (no native build)
 const { Pool } = require('pg');
 
-let stripe = null; // Optional: only used when STRIPE_SECRET is set
+let stripe = null;                            // optional until you add keys
 if (process.env.STRIPE_SECRET) {
   const Stripe = require('stripe');
   stripe = Stripe(process.env.STRIPE_SECRET);
@@ -74,8 +73,6 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
       }
     }
 
-    // Optional: handle charge.refunded to mark reversals
-
     return res.json({ received: true });
   } catch (err) {
     console.error('Stripe webhook error:', err);
@@ -114,7 +111,7 @@ async function verifyApiKey(req, res, next) {
     );
 
     for (const row of rows) {
-      const ok = await bcrypt.compare(raw, row.key_hash);
+      const ok = bcrypt.compareSync(raw, row.key_hash);
       if (ok) {
         const c = await q('select * from companies where id=$1', [row.company_id]);
         req.company = c.rows[0];
@@ -133,7 +130,7 @@ async function verifyApiKey(req, res, next) {
 /* Health check */
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-/* Create Checkout Session (real payments) */
+/* Create Checkout Session (real payments; needs Stripe keys) */
 app.post('/api/checkout', verifyApiKey, async (req, res) => {
   if (!stripe || !process.env.STRIPE_SECRET) {
     return res.status(501).json({ error: 'Stripe not configured yet. Use /api/dev/mock-payment to simulate.' });
@@ -238,25 +235,3 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log('Uniquity API listening on :' + port);
 });
-
-Environment variables you must set on Render (Add each in Settings > Environment):
-- DATABASE_URL = postgresql://postgres:%28%20%23FreeME2024%29@db.ziltrcaehpshkwganlcy.supabase.co:5432/postgres
-- DATABASE_SSL = true
-- CORS_ORIGINS = https://uksoldiers123-lab.github.io
-- SUCCESS_URL = https://uksoldiers123-lab.github.io/Uniquely-solutions/make-payments-success.html
-- CANCEL_URL = https://uksoldiers123-lab.github.io/Uniquely-solutions/make-payments.html?canceled=1
-- Later, when you open Stripe:
-  - STRIPE_SECRET = sk_test_xxx
-  - STRIPE_WEBHOOK_SECRET = whsec_xxx
-
-How to test now (without Stripe)
-- Health: open https://YOUR-SERVICE.onrender.com/api/health
-- Mock payment (use Hoppscotch or curl):
-  POST https://YOUR-SERVICE.onrender.com/api/dev/mock-payment
-  Headers:
-    Content-Type: application/json
-    X-API-Key: upk_live_YOUR_COMPANY_KEY
-  Body:
-    { "amount": 25.00, "invoiceNumber": "acme-1001" }
-- Check Supabase Table Editor: payments and transfers should show new rows.
-
