@@ -5,25 +5,31 @@ require('dotenv').config();
 const app = express();
 
 // Basic middlewares
-app.use(cors()); // optional; enable if you’re calling from a browser
-app.use(express.json()); // important: parse JSON bodies
+app.use(cors()); // enable if you’re calling from a browser
+app.use(express.json()); // parse JSON bodies
 
-// Optional health check
+// Health check (optional)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 // Mock payment endpoint
 app.post('/api/payments', (req, res) => {
+  console.log('[MOCK] /api/payments called', { body: req.body, headers: req.headers });
+
   const { amount, currency, invoice } = req.body;
 
   if (amount == null || currency == null) {
-    return res.status(400).json({ error: 'Missing amount or currency' });
+    const msg = 'Missing amount or currency';
+    console.error('[MOCK] error', msg);
+    return res.status(400).json({ error: msg });
   }
 
   const amt = Number(amount);
   if (Number.isNaN(amt) || amt <= 0) {
-    return res.status(400).json({ error: 'Invalid amount' });
+    const msg = 'Invalid amount';
+    console.error('[MOCK] error', msg);
+    return res.status(400).json({ error: msg });
   }
 
   const response = {
