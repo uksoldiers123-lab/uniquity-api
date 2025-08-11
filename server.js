@@ -1,49 +1,71 @@
+
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+const Stripe = require('stripe');
 const app = express();
 
-// Basic middlewares
-app.use(cors()); // enable if you’re calling from a browser
-app.use(express.json()); // parse JSON bodies
+// Env-based keys
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-// Health check (optional)
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Middlewares
+app.use(cors({ origin: '*' })); // testing only; tighten for production
+app.use(express.json());
+
+// Optional health check
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// 1) Create a PaymentIntent for a dynamic amount (client sends amount in USD)
+app.post('/create-payment-intent', async (req, res) => {
+  const { amount, currency = 'usd' } = req.body;
+  if (amount == null || isNaN(amount) || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid amount' });
+  }
+  try {
+    const amountInCents = Math.round(amount * 100);
+    const pi = await stripe.paymentIntents.create({
+      amount: amountInCents,
+      currency,
+      payment_method_types: ['card'],
+      // Optional: setup_future_usage: 'off_session',
+    });
+    res.json({ clientSecret: pi.client_secret });
+  } catch (err) {
+    console.error('Error creating PaymentIntent', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Mock payment endpoint
-app.post('/api/payments', (req, res) => {
-  console.log('[MOCK] /api/payments called', { body: req.body, headers: req.headers });
+// 2) Webhook endpoint (must use raw body to verify signature)
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
 
-  const { amount, currency, invoice } = req.body;
-
-  if (amount == null || currency == null) {
-    const msg = 'Missing amount or currency';
-    console.error('[MOCK] error', msg);
-    return res.status(400).json({ error: msg });
+  try {
+    event = Stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    console.error('Webhook signature error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  const amt = Number(amount);
-  if (Number.isNaN(amt) || amt <= 0) {
-    const msg = 'Invalid amount';
-    console.error('[MOCK] error', msg);
-    return res.status(400).json({ error: msg });
+  // Handle events you care about
+  if (event.type === 'payment_intent.succeeded') {
+    const pi = event.data.object;
+    // TODO: update DB / Supabase here using pi.id, pi.amount, etc.
+    console.log('Payment succeeded:', pi.id);
+  } else if (event.type === 'payment_intent.payment_failed') {
+    const pi = event.data.object;
+    console.log('Payment failed:', pi.id, pi.last_payment_error?.message);
   }
 
-  const response = {
-    id: 'mock_' + Date.now(),
-    amount: amt,
-    currency: String(currency).toLowerCase(),
-    invoice: invoice || null,
-    status: 'succeeded',
-    message: 'This is a mock payment'
-  };
-
-  res.json(response);
+  res.json({ received: true });
 });
 
-// Start the server
+// 3) Fallback 404
+app.use((req, res) => res.status(404).json({ error: 'Not found' }));
+
+// 4) Start
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Mock payment server listening on ${port}`));
+app.listen(port, () => console.log(`Server listening on ${port}`));
