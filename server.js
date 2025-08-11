@@ -1,13 +1,14 @@
+
 'use strict';
 
 require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const bcrypt = require('bcryptjs');          // pure JS (no native build)
 const { Pool } = require('pg');
 
-let stripe = null;                            // optional until you add keys
+// Stripe is optional until you add keys in Render
+let stripe = null;
 if (process.env.STRIPE_SECRET) {
   const Stripe = require('stripe');
   stripe = Stripe(process.env.STRIPE_SECRET);
@@ -73,6 +74,8 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
       }
     }
 
+    // Optional: handle charge.refunded for reversals
+
     return res.json({ received: true });
   } catch (err) {
     console.error('Stripe webhook error:', err);
@@ -98,31 +101,39 @@ app.use(
   })
 );
 
-/* API key middleware: X-API-Key (company embed key) */
+/* API key middleware — verify in Postgres using crypt() */
 async function verifyApiKey(req, res, next) {
-  try {
-    const raw = req.get('X-API-Key');
-    if (!raw) return res.status(401).json({ error: 'Missing API key' });
-    const prefix = raw.slice(0, 14);
+  const raw = req.get('X-API-Key');
+  if (!raw) return res.status(401).json({ error: 'Missing API key' });
 
+  const prefix = raw.slice(0, 14);
+  try {
     const { rows } = await q(
-      'select * from api_keys where key_prefix=$1 and status=$2',
-      [prefix, 'active']
+      `
+      select c.id as company_id, c.name, c.slug, c.payout_percent
+      from api_keys ak
+      join companies c on c.id = ak.company_id
+      where ak.key_prefix = $1
+        and ak.status = 'active'
+        and crypt($2, ak.key_hash) = ak.key_hash
+      limit 1
+      `,
+      [prefix, raw]
     );
 
-    for (const row of rows) {
-      const ok = bcrypt.compareSync(raw, row.key_hash);
-      if (ok) {
-        const c = await q('select * from companies where id=$1', [row.company_id]);
-        req.company = c.rows[0];
-        await q('update api_keys set last_used_at=now() where id=$1', [row.id]);
-        return next();
-      }
-    }
+    const row = rows[0];
+    if (!row) return res.status(401).json({ error: 'Invalid API key' });
 
-    return res.status(401).json({ error: 'Invalid API key' });
+    req.company = {
+      id: row.company_id,
+      name: row.name,
+      slug: row.slug,
+      payout_percent: row.payout_percent
+    };
+    await q('update api_keys set last_used_at = now() where key_prefix = $1', [prefix]);
+    return next();
   } catch (err) {
-    console.error('verifyApiKey error:', err);
+    console.error('verifyApiKey DB error:', err);
     return res.status(500).json({ error: 'Server error' });
   }
 }
@@ -235,3 +246,4 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log('Uniquity API listening on :' + port);
 });
+
