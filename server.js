@@ -1,64 +1,58 @@
-const express = require('express');
-const cors = require('cors');
-const Stripe = require('stripe');
-require('dotenv').config();
 
+const express = require("express");
 const app = express();
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const bodyParser = require("body-parser");
+const Stripe = require("stripe");
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // set in env
 
-app.use(cors({ origin: '*' })); // testing only; tighten for production
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(express.static("public")); // serves the front-end if you put it in public
 
-// Health check
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-// Create a PaymentIntent for a dynamic amount
-app.post('/create-payment-intent', async (req, res) => {
-  const { amount, currency = 'usd' } = req.body;
-  if (amount == null || isNaN(amount) || amount <= 0) {
-    return res.status(400).json({ error: 'Invalid amount' });
-  }
+// Create a PaymentIntent
+app.post("/create-payment-intent", async (req, res) => {
   try {
-    const amountInCents = Math.round(amount * 100);
-    const pi = await stripe.paymentIntents.create({
-      amount: amountInCents,
+    const { amount, currency = "usd", invoice, receipt_email } = req.body;
+
+    // You can attach metadata as needed
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
       currency,
-      payment_method_types: ['card'],
+      metadata: { invoice },
+      receipt_email
     });
-    res.json({ clientSecret: pi.client_secret });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
   } catch (err) {
-    console.error('Error creating PaymentIntent', err);
+    console.error("Error creating PaymentIntent:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Webhook endpoint
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  const sig = req.headers['stripe-signature'];
+// Webhooks (optional but recommended)
+app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
   let event;
+
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
-    console.error('Webhook signature error:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    console.log("Webhook signature verification failed.");
+    return res.sendStatus(400);
   }
 
-  if (event.type === 'payment_intent.succeeded') {
-    const pi = event.data.object;
-    console.log('Payment succeeded:', pi.id);
-    // Update your DB / Supabase here using pi.id, pi.amount, etc.
-  } else if (event.type === 'payment_intent.payment_failed') {
-    const pi = event.data.object;
-    console.log('Payment failed:', pi.id);
+  // Handle the event
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      // fulfill order
+      break;
+    // handle other events as needed
+    default:
   }
 
   res.json({ received: true });
 });
 
-// 404
-app.use((req, res) => res.status(404).json({ error: 'Not found' }));
-
-// Start
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server listening on ${port}`));
+const port = process.env.PORT || 4242;
+app.listen(port, () => console.log(`Server running on port ${port}`));
