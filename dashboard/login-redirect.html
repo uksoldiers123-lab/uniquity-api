@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8" /><title>Dashboard Redirect</title></head>
+<body>
+  <p>Signing you in...</p>
+  <script>
+    (async () => {
+      const q = new URLSearchParams(location.search);
+      const token = q.get('token');
+      if (!token) { window.location = 'https://dashboard.uniquitysolutions.com/login'; return; }
+
+      const r = await fetch('/dashboard/verify-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+
+      if (r.ok) {
+        window.location.href = 'https://dashboard.uniquitysolutions.com/';
+      } else {
+        window.location.href = 'https://dashboard.uniquitysolutions.com/login';
+      }
+    })();
+  </script>
+</body>
+</html>
+
+dashboard/verify-token endpoint (optional helper ondashboard host)
+dashboard/verify-token
+- Verifies the token and optionally creates a session cookie on the dashboard domain.
+
+dashboard/verify-token.js (Express-style)
+- Simple verifier (uses same DASHBOARD_JWT_SECRET)
+
+const jwt = require('jsonwebtoken');
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+const SECRET = process.env.DASHBOARD_JWT_SECRET;
+
+app.post('/verify-token', (req, res) => {
+  try {
+    const { token } = req.body;
+    const payload = jwt.verify(token, SECRET);
+    // Optionally create an HTTP-only session cookie for the dashboard
+    // res.cookie('dash_user', payload.userId, { httpOnly: true, domain: '.uniquitysolutions.com' });
+    res.json({ ok: true, userId: payload.userId });
+  } catch (e) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+module.exports = app;
