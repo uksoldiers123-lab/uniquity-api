@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
@@ -93,6 +94,26 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         if (updErr) console.error('Update payment to failed failed:', updErr);
         break;
       }
+      case 'checkout.session.completed': {
+        const s = event.data.object;
+        const external_id = s.id;
+        const { error: updErr } = await supabase
+          .from('payments')
+          .update({ status: 'succeeded', updated_at: new Date().toISOString() })
+          .eq('external_id', external_id);
+        if (updErr) console.error('Update payment (checkout) failed:', updErr);
+        break;
+      }
+      case 'checkout.session.expired': {
+        const s = event.data.object;
+        const external_id = s.id;
+        const { error: updErr } = await supabase
+          .from('payments')
+          .update({ status: 'failed', updated_at: new Date().toISOString() })
+          .eq('external_id', external_id);
+        if (updErr) console.error('Expire payment (checkout) failed:', updErr);
+        break;
+      }
       default:
         break;
     }
@@ -127,6 +148,7 @@ app.post('/create-payment-intent', async (req, res) => {
       currency,
       metadata: invoice ? { invoice: String(invoice) } : undefined,
       receipt_email: receipt_email || undefined,
+      automatic_payment_methods: { enabled: true },
     });
 
     res.json({ clientSecret: pi.client_secret });
@@ -219,6 +241,7 @@ app.post('/payments/record', async (req, res) => {
           account_code,
           user_id: account.user_id,
         },
+        automatic_payment_methods: { enabled: true },
       });
       external_id = pi.id;
       clientSecret = pi.client_secret;
@@ -269,21 +292,26 @@ function generateApiKey({ prefix = 'upk_live', length = 24 } = {}) {
 app.post('/api/api-keys', async (req, res) => {
   try {
     if (!isAuthorized(req)) return res.status(403).json({ error: 'Unauthorized' });
+
     const { company_id, prefix = 'upk_live' } = req.body || {};
     if (!company_id || typeof company_id !== 'string') {
       return res.status(400).json({ error: 'company_id required' });
     }
+
     const { key, key_prefix } = generateApiKey({ prefix });
     const key_hash = await bcrypt.hash(key, 12);
+
     const { data, error } = await supabase
       .from('api_keys')
       .insert([{ company_id, key_prefix, key_hash, status: 'active' }])
       .select('id, company_id, key_prefix, status, created_at')
       .maybeSingle();
+
     if (error) {
       console.error('Supabase insert error:', error);
       return res.status(500).json({ error: 'Failed to create API key' });
     }
+
     res.status(201).json({ key, metadata: data });
   } catch (err) {
     console.error('Error creating API key:', err);
@@ -294,23 +322,34 @@ app.post('/api/api-keys', async (req, res) => {
 app.get('/api/api-keys', async (req, res) => {
   try {
     if (!isAuthorized(req)) return res.status(403).json({ error: 'Unauthorized' });
+
     const company_id = String(req.query.company_id || '');
     const page = parseInt(req.query.page || '1', 10);
     const pageSize = Math.min(parseInt(req.query.page_size || '20', 10), 100);
+
     if (!company_id) return res.status(400).json({ error: 'company_id is required' });
+
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
+
     const { data, error, count } = await supabase
       .from('api_keys')
       .select('id, company_id, key_prefix, status, created_at, last_used_at', { count: 'exact' })
       .eq('company_id', company_id)
       .order('created_at', { ascending: false })
       .range(from, to);
+
     if (error) {
       console.error('Supabase select error:', error);
       return res.status(500).json({ error: 'Failed to fetch API keys' });
     }
-    res.json({ items: data || [], page, pageSize, total: count || 0 });
+
+    res.json({
+      items: data || [],
+      page,
+      pageSize,
+      total: count || 0,
+    });
   } catch (err) {
     console.error('Error listing API keys:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -320,17 +359,20 @@ app.get('/api/api-keys', async (req, res) => {
 app.get('/api/api-keys/:id', async (req, res) => {
   try {
     if (!isAuthorized(req)) return res.status(403).json({ error: 'Unauthorized' });
+
     const id = req.params.id;
     const { data, error } = await supabase
       .from('api_keys')
       .select('id, company_id, key_prefix, status, created_at, last_used_at')
       .eq('id', id)
       .maybeSingle();
+
     if (error) {
       console.error('Supabase select error:', error);
       return res.status(500).json({ error: 'Failed to fetch API key' });
     }
     if (!data) return res.status(404).json({ error: 'Not found' });
+
     res.json(data);
   } catch (err) {
     console.error('Error getting API key:', err);
@@ -341,23 +383,27 @@ app.get('/api/api-keys/:id', async (req, res) => {
 app.patch('/api/api-keys/:id/status', async (req, res) => {
   try {
     if (!isAuthorized(req)) return res.status(403).json({ error: 'Unauthorized' });
+
     const id = req.params.id;
     const { status } = req.body || {};
     const allowed = ['active', 'suspended', 'revoked'];
     if (!allowed.includes(String(status))) {
       return res.status(400).json({ error: 'Invalid status' });
     }
+
     const { data, error } = await supabase
       .from('api_keys')
       .update({ status })
       .eq('id', id)
       .select('id, company_id, key_prefix, status, created_at, last_used_at')
       .maybeSingle();
+
     if (error) {
       console.error('Supabase update error:', error);
       return res.status(500).json({ error: 'Failed to update status' });
     }
     if (!data) return res.status(404).json({ error: 'Not found' });
+
     res.json(data);
   } catch (err) {
     console.error('Error updating API key status:', err);
