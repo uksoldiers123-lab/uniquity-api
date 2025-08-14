@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const bodyParser = require('body-parser');
+const path = require('path'); // Add this line
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -12,6 +13,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
 app.use(bodyParser.json());
+
+// Serve static files from the frontend build folder
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // Middleware to authenticate user
 const authenticateUser = async (req, res, next) => {
@@ -80,39 +84,9 @@ app.get('/admin/companies', authenticateUser, verifyAdmin, async (req, res) => {
   }
 });
 
-// Client: Fetch payments for the logged-in user
-app.get('/client/payments', authenticateUser, async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    const { data: payments, error } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (error) throw error;
-    res.json(payments);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Client: Fetch user profile
-app.get('/client/profile', authenticateUser, async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (error) throw error;
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+// Serve the frontend for all other routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
 app.listen(port, () => {
