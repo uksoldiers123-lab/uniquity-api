@@ -1,134 +1,120 @@
-
+require('dotenv').config();
 const express = require('express');
-const path = require('path');
-const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
-const jwt = require('jsonwebtoken');
-
+const bodyParser = require('body-parser');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-// Supabase client
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(bodyParser.json());
 
-// Serve frontend
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'dashboard.html'));
-});
-
-// Helper: Get user role from JWT
-function getUserRole(req) {
+// Middleware to authenticate user
+const authenticateUser = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return null;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded.role;
+    const { data: user, error } = await supabase.auth.getUser(token);
+    if (error) throw error;
+
+    req.user = user;
+    next();
   } catch (error) {
-    return null;
+    res.status(401).json({ error: 'Unauthorized' });
   }
-}
+};
 
-// API endpoints
-app.get('/api/overview', async (req, res) => {
-  const role = getUserRole(req);
-  if (!role) return res.status(401).json({ error: 'Unauthorized' });
+// Middleware to verify admin role
+const verifyAdmin = (req, res, next) => {
+  if (req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Forbidden: Admins only' });
+  }
+};
 
+// Admin: Fetch all payments
+app.get('/admin/payments', authenticateUser, verifyAdmin, async (req, res) => {
   try {
-    let totalRevenue = 0;
-    let totalPayments = 0;
-    let activeCustomers = 0;
+    const { data: payments, error } = await supabase
+      .from('payments')
+      .select('*');
 
-    if (role === 'admin') {
-      // Admin: See all payments and customers
-      const { data: payments } = await supabase.from('payments').select('*');
-      const { data: customers } = await supabase.from('customers').select('*');
-
-      totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0) / 100;
-      totalPayments = payments.length;
-      activeCustomers = customers.length;
-    } else {
-      // Client: See only their payments and customers
-      const userId = jwt.decode(req.headers.authorization?.split(' ')[1]).userId;
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('user_id', userId);
-      const { data: customers } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('user_id', userId);
-
-      totalRevenue = payments.reduce((sum, payment) => sum + payment.amount, 0) / 100;
-      totalPayments = payments.length;
-      activeCustomers = customers.length;
-    }
-
-    res.json({ totalRevenue, totalPayments, activeCustomers });
+    if (error) throw error;
+    res.json(payments);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch overview data' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.get('/api/payments', async (req, res) => {
-  const role = getUserRole(req);
-  if (!role) return res.status(401).json({ error: 'Unauthorized' });
-
+// Admin: Fetch all users
+app.get('/admin/users', authenticateUser, verifyAdmin, async (req, res) => {
   try {
-    let payments;
-    if (role === 'admin') {
-      // Admin: See all payments
-      const { data, error } = await supabase.from('payments').select('*');
-      if (error) throw error;
-      payments = data;
-    } else {
-      // Client: See only their payments
-      const userId = jwt.decode(req.headers.authorization?.split(' ')[1]).userId;
-      const { data, error } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('user_id', userId);
-      if (error) throw error;
-      payments = data;
-    }
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('*');
 
-    res.json({ payments });
+    if (error) throw error;
+    res.json(users);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch payments' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.get('/api/customers', async (req, res) => {
-  const role = getUserRole(req);
-  if (!role) return res.status(401).json({ error: 'Unauthorized' });
-
+// Admin: Fetch all companies
+app.get('/admin/companies', authenticateUser, verifyAdmin, async (req, res) => {
   try {
-    let customers;
-    if (role === 'admin') {
-      // Admin: See all customers
-      const { data, error } = await supabase.from('customers').select('*');
-      if (error) throw error;
-      customers = data;
-    } else {
-      // Client: See only their customers
-      const userId = jwt.decode(req.headers.authorization?.split(' ')[1]).userId;
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('user_id', userId);
-      if (error) throw error;
-      customers = data;
-    }
+    const { data: companies, error } = await supabase
+      .from('companies')
+      .select('*');
 
-    res.json({ customers });
+    if (error) throw error;
+    res.json(companies);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch customers' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Start the server
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Client: Fetch payments for the logged-in user
+app.get('/client/payments', authenticateUser, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const { data: payments, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Client: Fetch user profile
+app.get('/client/profile', authenticateUser, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) throw error;
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
