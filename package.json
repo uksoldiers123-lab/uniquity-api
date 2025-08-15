@@ -1,5 +1,5 @@
 {
-  "name": "supabase-react-app",
+  "name": "uniquity-solutions-frontend",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -35,22 +35,6 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "eslint": "^8.45.0",
-    "eslint-plugin-react": "^7.32.2",
-    "prettier": "^3.0.0"
-  }
-}         "last 1 safari version"
-       ]
-     },
-     "devDependencies": {
-       "eslint": "^8.45.0",
-       "eslint-plugin-react": "^7.32.2",
-       "prettier": "^3.0.0"
-     }
-}      "last 1 safari version"
     ]
   },
   "devDependencies": {
