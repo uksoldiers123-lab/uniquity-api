@@ -19,7 +19,6 @@ function Login() {
       });
       if (error) throw error;
       console.log('Logged in:', data);
-      // Redirect to dashboard
       window.location.href = '/dashboard';
     } catch (error) {
       setError(error.message);
