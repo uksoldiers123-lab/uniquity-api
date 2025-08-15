@@ -10,8 +10,27 @@ const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Protected Route Component
+import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+
 function ProtectedRoute({ children }) {
-  const user = supabase.auth.user();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Add a loading state
+  }
+
   return user ? children : <Navigate to="/login" />;
 }
 
