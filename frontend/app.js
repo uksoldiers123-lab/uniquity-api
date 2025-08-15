@@ -16,7 +16,6 @@ function ProtectedRoute({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if the user is authenticated
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -26,29 +25,47 @@ function ProtectedRoute({ children }) {
     fetchUser();
   }, []);
 
-  if (loading) return <p>Loading...</p>; // Show a loading spinner
+  if (loading) {
+    return <div>Loading...</div>; // Add a loading state
+  }
+
   return user ? children : <Navigate to="/login" />;
 }
 
 // Main App Component
 function App() {
+  // Listen for authentication state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session);
+      // You can update the UI or perform other actions here
+    });
+
+    return () => subscription.unsubscribe(); // Cleanup on unmount
+  }, []);
+
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        {/* Public Routes */}
+        <Route path="/login" element={<Login supabase={supabase} />} />
+        <Route path="/signup" element={<Signup supabase={supabase} />} />
+
+        {/* Protected Route */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Dashboard supabase={supabase} />
             </ProtectedRoute>
           }
         />
+
+        {/* Default Route */}
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );
 }
 
-export default App;
+export default App; // Add this line to properly export the App component
