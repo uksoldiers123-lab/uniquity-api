@@ -1,94 +1,37 @@
-require('dotenv').config();
+// backend/server.js
 const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
-const bodyParser = require('body-parser');
-const path = require('path'); // Add this line
-const app = express();
-const port = process.env.PORT || 3000;
+const Stripe = require('stripe');
+const cors = require('cors');
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Express and Stripe
+const app = express();
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Use environment variable for the Stripe Secret Key
 
 // Middleware
-app.use(bodyParser.json());
+app.use(cors()); // Enable CORS for cross-origin requests
+app.use(express.json()); // Parse JSON request bodies
 
-// Serve static files from the frontend build folder
-app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-// Middleware to authenticate user
-const authenticateUser = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+// Create a Payment Intent
+app.post('/api/create-payment-intent', async (req, res) => {
+  const { amount, currency } = req.body;
 
   try {
-    const { data: user, error } = await supabase.auth.getUser(token);
-    if (error) throw error;
+    // Create a Payment Intent with Stripe
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount, // Amount in cents (e.g., $10.00 = 1000)
+      currency, // Currency (e.g., 'usd')
+    });
 
-    req.user = user;
-    next();
+    // Send the client secret to the frontend
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    res.status(401).json({ error: 'Unauthorized' });
-  }
-};
-
-// Middleware to verify admin role
-const verifyAdmin = (req, res, next) => {
-  if (req.user.role === 'admin') {
-    next();
-  } else {
-    res.status(403).json({ error: 'Forbidden: Admins only' });
-  }
-};
-
-// Admin: Fetch all payments
-app.get('/admin/payments', authenticateUser, verifyAdmin, async (req, res) => {
-  try {
-    const { data: payments, error } = await supabase
-      .from('payments')
-      .select('*');
-
-    if (error) throw error;
-    res.json(payments);
-  } catch (error) {
+    console.error('Error creating Payment Intent:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Admin: Fetch all users
-app.get('/admin/users', authenticateUser, verifyAdmin, async (req, res) => {
-  try {
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('*');
-
-    if (error) throw error;
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Admin: Fetch all companies
-app.get('/admin/companies', authenticateUser, verifyAdmin, async (req, res) => {
-  try {
-    const { data: companies, error } = await supabase
-      .from('companies')
-      .select('*');
-
-    if (error) throw error;
-    res.json(companies);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Serve the frontend for all other routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-});
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
