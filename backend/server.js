@@ -119,3 +119,49 @@ app.post('/api/create-checkout-session', async (req, res) => {
     res.status(500).json({ error: 'checkout_session_error' });
   }
 });
+
+// 3) Checkout flow (simple link): redirect to Stripe
+// GET /pay?amount=49.99&description=Invoice
+app.get('/pay', async (req, res) => {
+  try {
+    const cents = toCents(req.query.amount ?? '49.99'); // default $49.99
+    if (!cents) return res.status(400).send('Invalid amount');
+
+    const description = (req.query.description || 'Uniquity Payment').toString().slice(0, 100);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: cents,
+            product_data: { name: description }
+          },
+          quantity: 1
+        }
+      ],
+      success_url: SUCCESS_URL,
+      cancel_url: CANCEL_URL
+    });
+
+    res.redirect(303, session.url);
+  } catch (error) {
+    console.error('Redirect pay error:', error);
+    res.status(500).send('Payment init failed');
+  }
+});
+
+// Global error handler
+app.use((err, _req, res, _next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'server_error' });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Uniquity API running on port ${PORT}`);
+  console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+});
