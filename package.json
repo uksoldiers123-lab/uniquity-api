@@ -1,45 +1,18 @@
 {
-  "name": "uniquity-solutions-frontend",
+  "name": "uniquity-api",
   "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.14.2",
-    "react-scripts": "^5.0.1",
-    "web-vitals": "^2.1.4"
-  },
+  "description": "Backend API for Uniquity Solutions",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "format": "prettier --write \"src/**/*.{js,jsx,json,css}\"",
-    "lint": "eslint \"src/**/*.{js,jsx}\" --quiet",
-    "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "express": "^4.18.2",
+    "stripe": "^12.5.0",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
-    "eslint": "^8.45.0",
-    "eslint-plugin-react": "^7.32.2",
-    "prettier": "^3.0.0"
+    "nodemon": "^3.0.2"
   }
 }
