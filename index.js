@@ -2,31 +2,31 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
-const app = express();
+const { createClient } = require('@supabase/supabase-js');
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Use sk_live_... for production
+const app = express();
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 app.use(express.json());
 
-// CORS: Allow your frontend domain(s)
+// CORS for frontend domains
 const FRONTEND_ORIGINS = [
   'https://uniquitysolutions.com',
   'https://www.uniquitysolutions.com',
   'https://dashboard.uniquitysolutions.com'
 ];
-app.use(cors({
-  origin: FRONTEND_ORIGINS,
-  credentials: true
-}));
+app.use(cors({ origin: FRONTEND_ORIGINS, credentials: true }));
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
+// Health
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // Legacy: existing simple PaymentIntent endpoint
 // POST /api/create-payment-intent
-// Body: { amount: <in cents>, currency: "usd", description: "...", metadata: { ... } }
+// Body: { amount (in cents), currency, description, metadata }
 app.post('/api/create-payment-intent', async (req, res) => {
   const { amount, currency = 'usd', description, metadata } = req.body;
   if (!amount || typeof amount !== 'number' || amount <= 0) {
@@ -47,55 +47,76 @@ app.post('/api/create-payment-intent', async (req, res) => {
   }
 });
 
-// NEW: Connect-aware endpoint
-// POST /api/create-payment-intent-for-client
-// Body: { amount, currency, clientId, description, receipt_email }
-async function getConnectedAccountForClient(clientId) {
-  // Replace this with your real DB lookup to map clientId to connected_account_id
-  // Example: return { connected_account_id: 'acct_1ABC12345' };
-  if (!clientId) throw new Error('clientId required');
-  // TODO: replace with actual mapping
-  return { connected_account_id: 'acct_1ExampleConnected', clientName: 'Example Client' };
-}
-async function logPaymentToSupabase(clientId, amount, currency, paymentIntentId, receipt_email, description) {
-  // Optional: wire up Supabase server-side logging here if you want
-  // const { createClient } = require('@supabase/supabase-js');
-  // const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-  // await supabase.from('payments').insert([{...}]);
-  return;
+// Helper: map clientCode -> connected_account_id and per-client fees from Supabase
+async function getClientRow(clientCode) {
+  const { data, error } = await supabase
+    .from('clients')
+    .select('id, client_code, name, connected_account_id, email, fee_percent, fee_fixed_cents, tenant_id')
+    .eq('client_code', clientCode)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error('Unknown client');
+  return data;
 }
 
+async function logPaymentToSupabase(clientCode, amount, currency, paymentIntentId, receipt_email, description) {
+  // Optional: log to payments table (adjust fields as needed)
+  const { data, error } = await supabase.from('payments').insert([
+    {
+      // client_id: <set after you fetch client row>,
+      amount,
+      currency,
+      payment_intent_id: paymentIntentId,
+      payer_email: receipt_email,
+      description,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      metadata: { clientCode, description }
+    }
+  ]);
+  if (error) console.error('Supabase insert error:', error);
+  return data;
+}
+
+// NEW: Connect-aware endpoint
+// POST /api/create-payment-intent-for-client
+// Body: { amount (in cents), currency, clientCode, description, receipt_email }
 app.post('/api/create-payment-intent-for-client', async (req, res) => {
-  const { amount, currency = 'usd', clientId, description, receipt_email } = req.body;
+  const { amount, currency = 'usd', clientCode, description, receipt_email } = req.body;
+
   if (!amount || typeof amount !== 'number' || amount <= 0) {
     return res.status(400).json({ error: 'Invalid amount' });
   }
+
   try {
-    const { connected_account_id } = await getConnectedAccountForClient(clientId);
+    // Resolve client and its connected account
+    const clientRow = await getClientRow(clientCode);
+    const connected_account_id = clientRow?.connected_account_id;
     if (!connected_account_id) {
       return res.status(400).json({ error: 'Unknown client' });
     }
 
-    // Platform fee (in cents). Customize as needed
-    const application_fee_amount = Math.round(amount * 0.10); // 10% platform fee
+    // Per-client fee (percent + fixed)
+    const percent = Number(clientRow.fee_percent) || 0.10;
+    const fixed = Number(clientRow.fee_fixed_cents) || 0;
+    const application_fee_amount = Math.round(amount * percent) + fixed; // in cents
 
     const pi = await stripe.paymentIntents.create({
       amount,
       currency,
       description,
-      receipt_email,
       payment_method_types: ['card'],
-      transfer_data: {
-        destination: connected_account_id,
-        // If you want to ensure the client receives amount - app fee, uncomment:
-        // amount: Math.max(0, amount - application_fee_amount),
-      },
+      transfer_data: { destination: connected_account_id },
       application_fee_amount,
-      metadata: { clientId, description },
+      metadata: {
+        clientCode,
+        description,
+        connected_account_id
+      }
     });
 
     // Optional: log to Supabase
-    await logPaymentToSupabase(clientId, amount, currency, pi.id, receipt_email, description);
+    await logPaymentToSupabase(clientCode, amount, currency, pi.id, receipt_email, description);
 
     res.json({ clientSecret: pi.client_secret });
   } catch (e) {
@@ -104,8 +125,13 @@ app.post('/api/create-payment-intent-for-client', async (req, res) => {
   }
 });
 
-// Optional: webhook endpoint for reconciliation (not shown) 
-// app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => { ... });
+// Optional: webhook (skeleton)
+//
+// const bodyParser = express.json({ type: 'application/json' });
+// app.post('/webhook', bodyParser, (req, res) => {
+//   // verify signature if you set STRIPE_WEBHOOK_SECRET
+//   res.json({ received: true });
+// });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
