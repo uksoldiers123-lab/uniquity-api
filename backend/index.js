@@ -16,11 +16,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// In-memory mock of client data (replace with real DB)
+// In-memory client data (replace with your DB)
 const clients = {
   'CLI-001': {
     clientCode: 'CLI-001',
-    connected_account_id: 'acct_1ExampleConnected', // Stripe Connect destination
+    connected_account_id: 'acct_live_example', // Stripe Connect destination
     fee_percent: 0.10, // 10%
     fee_fixed_cents: 0
   },
@@ -34,7 +34,7 @@ function getClientRowByCode(code) {
 
 // POST /api/create-payment-intent-for-client
 app.post('/api/create-payment-intent-for-client', async (req, res) => {
-  const { amount, currency = 'usd', clientCode, description, receipt_email } = req.body;
+  const { amount, currency = 'usd', clientCode, description, receipt_email, billing_details } = req.body;
 
   // Basic validation
   if (!amount || typeof amount !== 'number' || amount <= 0) {
@@ -52,12 +52,11 @@ app.post('/api/create-payment-intent-for-client', async (req, res) => {
       return res.status(400).json({ error: 'Client not configured for Connect' });
     }
 
-    // Fee calculation (example)
+    // Fees calculation
     const percent = Number(clientRow.fee_percent) || 0;
     const fixed = Number(clientRow.fee_fixed_cents) || 0;
     const application_fee_amount = Math.round(amount * percent) + fixed;
 
-    // Create PaymentIntent for Card payments
     const piParams = {
       amount,
       currency,
@@ -68,6 +67,11 @@ app.post('/api/create-payment-intent-for-client', async (req, res) => {
       application_fee_amount,
       metadata: { clientCode, description, connected_account_id }
     };
+
+    // If billing_details provided, attach to payment intent (Stripe accepts this field on create)
+    if (billing_details) {
+      piParams.billing_details = billing_details;
+    }
 
     const pi = await stripe.paymentIntents.create(piParams);
 
