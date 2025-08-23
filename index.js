@@ -3,9 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
-const app = express();
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const app = express();
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Use sk_live_... in production
+
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -30,7 +31,7 @@ app.post('/api/create-payment-intent', async (req, res) => {
     return res.status(400).json({ error: 'Invalid amount' });
   }
   try {
-    const pi = await stripe.paymentIntents.create({
+    const pi = await stripe.paymentIntent.create({
       amount,
       currency,
       description,
@@ -44,20 +45,16 @@ app.post('/api/create-payment-intent', async (req, res) => {
   }
 });
 
-// Admin: create client (simple example)
+// Admin: create client
 app.post('/api/admin/create-client', async (req, res) => {
   const { client_code, name, email, tenant_id, fee_percent = 0.10, fee_fixed_cents = 0 } = req.body;
   if (!client_code || !name) return res.status(400).json({ error: 'client_code and name required' });
 
   const { data, error } = await supabase.from('clients').insert([
     {
-      client_code,
-      name,
-      email,
-      tenant_id,
+      client_code, name, email, tenant_id,
       connected_account_id: null,
-      fee_percent,
-      fee_fixed_cents
+      fee_percent, fee_fixed_cents
     }
   ]).select();
 
@@ -65,10 +62,11 @@ app.post('/api/admin/create-client', async (req, res) => {
     console.error('Admin create-client error:', error);
     return res.status(500).json({ error: error.message });
   }
+
   res.json({ client: data[0] });
 });
 
-// Public signup: signup-client (create Stripe Connect account + mapping)
+// Public signup: signup-client
 app.post('/api/signup-client', async (req, res) => {
   const { client_code, name, email, country = 'US' } = req.body;
   if (!client_code || !name) return res.status(400).json({ error: 'client_code and name required' });
@@ -77,13 +75,9 @@ app.post('/api/signup-client', async (req, res) => {
     const acct = await stripe.accounts.create({ type: 'express', country, email });
     const { data, error } = await supabase.from('clients').insert([
       {
-        client_code,
-        name,
-        email,
+        client_code, name, email,
         connected_account_id: acct.id,
-        fee_percent: 0.10,
-        fee_fixed_cents: 0,
-        tenant_id: null
+        fee_percent: 0.10, fee_fixed_cents: 0, tenant_id: null
       }
     ]).select();
 
@@ -107,7 +101,7 @@ app.post('/api/signup-client', async (req, res) => {
 async function getClientRowByCode(clientCode) {
   const { data, error } = await supabase
     .from('clients')
-    .select('id, client_code, name, connected_account_id, fee_percent, fee_fixed_cents')
+    .select('id, client_code, name, connected_account_id, fee_percent, fee_fixed_cents, tenant_id')
     .eq('client_code', clientCode)
     .maybeSingle();
   if (error) throw error;
@@ -116,18 +110,13 @@ async function getClientRowByCode(clientCode) {
 }
 
 async function logPaymentToSupabase(clientCode, amount, currency, paymentIntentId, receipt_email, description) {
-  // Optional server-side log
   try {
     const { data, error } = await supabase.from('payments').insert([
       {
         client_code: clientCode,
-        amount,
-        currency,
-        payment_intent_id: paymentIntentId,
-        payer_email: receipt_email,
-        description,
-        status: 'pending',
-        created_at: new Date().toISOString(),
+        amount, currency, payment_intent_id: paymentIntentId,
+        payer_email: receipt_email, description,
+        status: 'pending', created_at: new Date().toISOString(),
         metadata: { clientCode, description }
       }
     ]);
@@ -140,6 +129,7 @@ async function logPaymentToSupabase(clientCode, amount, currency, paymentIntentI
 
 app.post('/api/create-payment-intent-for-client', async (req, res) => {
   const { amount, currency = 'usd', clientCode, description, receipt_email } = req.body;
+
   if (!amount || typeof amount !== 'number' || amount <= 0) {
     return res.status(400).json({ error: 'Invalid amount' });
   }
@@ -151,6 +141,7 @@ app.post('/api/create-payment-intent-for-client', async (req, res) => {
       return res.status(400).json({ error: 'Unknown client' });
     }
 
+    // Per-client fee
     const percent = Number(clientRow.fee_percent) || 0.10;
     const fixed = Number(clientRow.fee_fixed_cents) || 0;
     const application_fee_amount = Math.round(amount * percent) + fixed;
@@ -175,7 +166,7 @@ app.post('/api/create-payment-intent-for-client', async (req, res) => {
   }
 });
 
-// Optional: webhook skeleton
+// Optional webhook skeleton
 // app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => { res.json({ received: true }); });
 
 const PORT = process.env.PORT || 3000;
