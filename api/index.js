@@ -1,25 +1,11 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const paymentsRouter = require('./payments/create-payment-intent-for-client'); // path to the route file
-const app = express();
-const port = process.env.PORT || 3000;
+// This file is the launcher for the API.
+// It imports the app from server.js and starts the HTTP server.
 
-// Middleware
-app.use(bodyParser.json());
+const app = require('./server');
+const PORT = process.env.PORT || 3000;
 
-// Mount API routes
-app.use('/api', (req, res, next) => {
-  // Simple passthrough; you can add auth/middleware here
-  next();
+app.listen(PORT, () => {
+  console.log(`Server listening on http://localhost:${PORT}`);
 });
 
-// Public payments endpoint
-app.use('/api', paymentsRouter);
-
-// Health
-app.get('/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
-
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`API server listening at http://localhost:${port}`);
-});
+module.exports = app;
