@@ -1,11 +1,10 @@
-// This file is the launcher for the API.
-// It imports the app from server.js and starts the HTTP server.
-
+const http = require('http');
 const app = require('./server');
-const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3001;
+
+const server = http.createServer(app);
+server.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`API server listening on port ${PORT}`);
 });
-
-module.exports = app;
