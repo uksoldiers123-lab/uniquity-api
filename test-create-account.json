@@ -1,4 +1,5 @@
- "businessName": "Acme Widgets LLC",
+ {
+  "businessName": "Acme Widgets LLC",
   "ownerName": "Jane Doe",
   "email": "jane@example.com",
   "country": "US",
@@ -10,4 +11,4 @@
     "state": "CA",
     "postalCode": "94111"
   }
-}
+
