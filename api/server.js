@@ -1,47 +1,53 @@
 const express = require('express');
-const router = express.Router();
-const bodyParser = express.json;
+const Stripe = require('stripe');
+const cors = require('cors');
+const { createClientDashboardRouter } = require('./routes/client-dashboard');
+const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
 
-// You must configure a Stripe webhook signing secret in your Stripe dashboard and export it
-const STRIPE_WEBHOOK_SIGNING_SECRET = process.env.STRIPE_WEBHOOK_SIGNING_SECRET;
+// Optional: Supabase auth middleware (replace with real)
+ // const { supabaseAuthMiddleware } = require('../middleware/supabase-auth');
 
-// Webhook endpoint uses raw body to verify signature; adapt if needed
-router.post('/', bodyParser({ type: 'application/json' }), (req, res) => {
-  if (!STRIPE_WEBHOOK_SIGNING_SECRET) {
-    console.error('STRIPE_WEBHOOK_SIGNING_SECRET not configured');
-    return res.status(500).send('Webhook secret not configured');
-  }
-  // Note: For proper verification, you should use the raw request body.
-  // This placeholder assumes body is already parsed; adjust as needed.
-  const stripe = req.app.get('stripe');
-  const sig = req.headers['stripe-signature'];
-  let event;
-  try {
-    // If you use the raw body, replace with: stripe.webhooks.constructEvent(req.rawBody, sig, STRIPE_WEBHOOK_SIGNING_SECRET)
-    event = stripe.webhooks.constructEvent(JSON.stringify(req.body || {}), sig, STRIPE_WEBHOOK_SIGNING_SECRET);
-  } catch (err) {
-    console.error('Webhook signature verification failed', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
+const app = express();
 
-  // Simple event handling
-  switch (event.type) {
-    case 'payment_intent.succeeded': {
-      const pi = event.data.object;
-      console.log('PaymentIntent succeeded', pi.id);
-      // Persist to DB: payments table with client_id from metadata if you stored it
-      break;
-    }
-    case 'charge.succeeded': {
-      const charge = event.data.object;
-      console.log('Charge succeeded', charge.id);
-      break;
-    }
-    // Add more events as needed
-    default:
-      console.log(`Unhandled event type ${event.type}`);
-  }
-  res.json({ received: true });
-});
+// Env vars (replace with real values)
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ziltrcaehpshkwganlcy.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'public-anon-key';
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+if (!STRIPE_SECRET_KEY) {
+  console.error('Missing STRIPE_SECRET_KEY');
+  process.exit(1);
+}
+const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
 
-module.exports = { createStripeWebhookRouter: () => router };
+const APP_BASE_URL = process.env.APP_BASE_URL || 'https://uniquitysolutions.com';
+const ALLOWED_ORIGINS = (
+  process.env.ALLOWED_ORIGINS ||
+  `${APP_BASE_URL},https://dashboard.uniquitysolutions.com`
+).split(',').map(s => s.trim()).filter(Boolean);
+
+// Middlewares
+app.use(cors({
+  origin: function(origin, cb) {
+    if (!origin) return cb(null, true);
+    cb(null, ALLOWED_ORIGINS.includes(origin));
+  },
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Id']
+}));
+app.use(express.json());
+
+// Simple health check
+app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
+
+// Attach Stripe instance to app for routes to reuse
+app.set('stripe', stripe);
+
+// Routes
+const clientDashboardRouter = createClientDashboardRouter();
+app.use('/client-dashboard', clientDashboardRouter);
+
+// Stripe webhooks
+const webhookRouter = createStripeWebhookRouter(stripe);
+app.use('/webhooks/stripe', webhookRouter);
+
+module.exports = app;
