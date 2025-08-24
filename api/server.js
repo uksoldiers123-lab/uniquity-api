@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
 
-// Ensure STRIPE_SECRET_KEY is set
+// Env vars required:
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 if (!STRIPE_SECRET_KEY) {
   console.error('Missing STRIPE_SECRET_KEY');
@@ -10,9 +10,9 @@ if (!STRIPE_SECRET_KEY) {
 }
 const stripe = Stripe(STRIPE_SECRET_KEY);
 
-// Optional envs
+// Optional envs:
 const SUCCESS_URL = process.env.SUCCESS_URL || 'https://uniquitysolutions.com/success';
-const CANCEL_URL = process.env.CANCEL_URL || 'https://uniquitysolutions.com/cancel';
+const CANCEL_URL  = process.env.CANCEL_URL  || 'https://uniquitysolutions.com/cancel';
 
 const app = express();
 
@@ -31,7 +31,7 @@ const allowedOrigins = envOrigins.length ? envOrigins : defaultOrigins;
 
 app.use(cors({
   origin: function(origin, cb) {
-    if (!origin) return cb(null, true);
+    if (!origin) return cb(null, true); // allow curl/postman
     cb(null, allowedOrigins.includes(origin));
   },
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -43,7 +43,7 @@ app.use(express.json());
 // Health
 app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
-// Helpers (you can move to a util file later)
+// Helpers (you can move to a util later)
 function toCents(amount) {
   if (amount === undefined || amount === null || amount === '') return null;
   let cents = null;
@@ -82,6 +82,5 @@ app.post('/api/create-payment-intent', async (req, res) => {
 
 // You can add more routes here (checkout, webhooks, etc.)
 
-// 404/error handlers can go here if you want
-
+// Export the app
 module.exports = app;
