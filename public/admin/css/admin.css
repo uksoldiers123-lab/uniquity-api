@@ -1,0 +1,9 @@
+:root { --brand: #1f2a44; --bg: #f5f7fa; }
+body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: #333; }
+header { background: var(--brand); color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+#admin-nav { display: flex; gap: 12px; }
+#admin-nav a { color: #fff; text-decoration: none; padding: 6px 10px; border-radius: 6px; }
+#admin-nav a.active { background: rgba(255,255,255,.25); }
+main { padding: 16px; }
+
+/* Simple utility card look can be extended later */
