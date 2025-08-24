@@ -1,0 +1,59 @@
+File: 20250101_create_merchants_clients.sql
+-- Create merchants/clients table
+CREATE TABLE IF NOT EXISTS merchants_clients (
+  id SERIAL PRIMARY KEY,
+  client_code TEXT UNIQUE NOT NULL,
+  connected_account_id TEXT,
+  payout_percent NUMERIC(5,2) DEFAULT 0,
+  application_fee_amount NUMERIC(12,2) DEFAULT 0,
+  status TEXT DEFAULT 'inactive',
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+File: 20250101_create_accounts_connect_mapping.sql
+-- Mapping between environment, clientCode and Stripe Connect account
+CREATE TABLE IF NOT EXISTS accounts_connect_mapping (
+  id SERIAL PRIMARY KEY,
+  client_code TEXT NOT NULL,
+  environment TEXT NOT NULL DEFAULT 'production',
+  connected_account_id TEXT,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+  UNIQUE (client_code, environment)
+);
+
+File: 20250101_create_payments.sql
+-- Payments records
+CREATE TABLE IF NOT EXISTS payments (
+  id SERIAL PRIMARY KEY,
+  external_id TEXT,
+  amount BIGINT,
+  currency TEXT,
+  status TEXT,
+  client_code TEXT,
+  connected_account_id TEXT,
+  payment_intent_id TEXT,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+File: 20250101_create_users_roles.sql
+-- Basic users and roles
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT,
+  password_hash TEXT,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS roles (
+  id SERIAL PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS merchants_roles (
+  merchant_id INTEGER REFERENCES merchants_clients(id),
+  role_id INTEGER REFERENCES roles(id),
+  PRIMARY KEY (merchant_id, role_id)
+);
