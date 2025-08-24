@@ -4,27 +4,47 @@
   <meta charset="UTF-8" />
   <title>Uniquity Solutions Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/admin.css" />
+  <!-- Simple reset and font -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Inline fallback styles; you can move to admin.css later */
-    body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fa; color: #333; }
-    header { background: #1f2a44; color: #FF6F00; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
-    header h1 { margin: 0; font-size: 1.1rem; }
-    #admin-nav { display: flex; gap: 12px; }
-    #admin-nav a { color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 6px; }
-    #admin-nav a.active { background: #3a4b8a; }
-    main { padding: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-    .card { background: #fff; border: 1px solid #e0e4f1; border-radius: 8px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-    .card h3 { margin-top: 0; }
+    :root {
+      --brand: #FF6F00;
+      --brand-dark: #e65a00;
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto; color: var(--text); background: var(--bg); }
+    header { background: var(--brand); color: #fff; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .2px; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display: inline-block; }
+    nav { display: flex; gap: 12px; align-items: center; }
+    nav a { color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 6px; }
+    nav a.active, nav a:hover { background: rgba(255,255,255,.25); }
+    main { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px; }
+    aside.card { padding-top: 8px; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+    h2, h3 { margin: 0 0 8px; font-weight: 600; }
+    .section-title { font-size: 14px; text-transform: uppercase; color: #64748b; letter-spacing: .5px; margin-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+    .panel { min-height: 260px; }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
+  <!-- Header / Navbar -->
   <header>
-    <div class="brand">
-      <strong>Uniquity Solutions Admin</strong>
+    <div class="brand" aria-label="Brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Uniquity Solutions Admin</span>
     </div>
-    <nav id="admin-nav">
+    <nav aria-label="Admin Navigation" id="adminNav">
       <a href="#/merchants" class="nav-link" data-route="/merchants">Merchants</a>
       <a href="#/payments" class="nav-link" data-route="/payments">Payments</a>
       <a href="#/payouts" class="nav-link" data-route="/payouts">Payouts</a>
@@ -33,12 +53,32 @@
   </header>
 
   <main>
-    <div id="content" aria-live="polite"></div>
+    <aside class="card" aria-label="Admin sidebar" style="min-height: 420px;">
+      <div class="section">
+        <div class="section-title">Overview</div>
+        <p style="color:#64748b; margin-top:0;">
+          This dashboard helps staff manage merchants, payments and payouts connected to Stripe Connect.
+        </p>
+        <ul style="padding-left:18px; margin:0;">
+          <li>Merchants: onboarding, clientCode mapping, and connect accounts</li>
+          <li>Payments: per-client payments and history</li>
+          <li>Payouts: transfers to connected accounts</li>
+        </ul>
+      </div>
+    </aside>
+
+    <section id="content" class="card panel" aria-label="Admin content area" style="padding: 20px;">
+      <div id="panel">
+        <h2 style="margin:0 0 6px;">Welcome to Unuity Admin</h2>
+        <p style="color:#64748b; margin-top:0;">
+          Use the left menu to navigate Merchants, Payments, and Payouts.
+        </p>
+      </div>
+    </section>
   </main>
 
-  <script src="js/admin-navigation.js"></script>
   <script>
-    // Simple hash-based router (the SPA logic mirrors the static admin patch)
+    // Tiny hash-based router
     const routes = {
       '/merchants': renderMerchants,
       '/payments': renderPayments,
@@ -46,103 +86,100 @@
       '/onboarding': renderOnboarding
     };
 
-    function renderMerchants() {
-      setActiveLink('/merchants');
-      const c = document.getElementById('content');
-      c.innerHTML = `
-        <div class="card">
-          <h3>Merchants</h3>
-          <p>Admin view to create/manage merchants and their Stripe Connect accounts.</p>
-          <button id="load-merchants">Load Merchants</button>
-          <div id="merchants-table"></div>
-        </div>
-      `;
-      document.getElementById('load-merchants').addEventListener('click', async () => {
-        const resp = await fetch('/admin/merchants').then(r => r.json()).catch(() => null);
-        const tbl = document.getElementById('merchants-table');
-        if (!resp || !resp.merchants) {
-          tbl.innerHTML = '<p>No merchants found or error loading.</p>';
-          return;
-        }
-        tbl.innerHTML = `
-          <table>
-            <thead><tr><th>Client Code</th><th>Name</th><th>Connect ID</th><th>Status</th></tr></thead>
-            <tbody>${resp.merchants.map(m => `
-              <tr><td>${m.clientCode||''}</td><td>${m.name||''}</td><td>${m.connect_id||''}</td><td>${m.status||''}</td></tr>
-            `).join('')}</tbody>
-          </table>
-        `;
-      });
-    }
-
-    function renderPayments() {
-      setActiveLink('/payments');
-      const c = document.getElementById('content');
-      c.innerHTML = `
-        <div class="card">
-          <h3>Payments</h3>
-          <p>Overview of payments per client.</p>
-          <button id="load-payments">Load Payments</button>
-          <div id="payments-table"></div>
-        </div>
-      `;
-      document.getElementById('load-payments').addEventListener('click', async () => {
-        const resp = await fetch('/admin/payments').then(r => r.json()).catch(() => null);
-        const tbl = document.getElementById('payments-table');
-        if (!resp || ! resp.payments) {
-          tbl.innerHTML = '<p>No payments found or error loading.</p>';
-          return;
-        }
-        tbl.innerHTML = `
-          <table>
-            <thead><tr><th>Payment ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th></tr></thead>
-            <tbody>${resp.payments.map(p => `
-              <tr><td>${p.id||''}</td><td>${p.clientCode||''}</td><td>${p.amount||''}</td><td>${p.currency||''}</td><td>${p.status||''}</td></tr>
-            `).join('')}</tbody>
-          </table>
-        `;
-      });
-    }
-
-    function renderPayouts() {
-      setActiveLink('/payouts');
-      const c = document.getElementById('content');
-      c.innerHTML = `
-        <div class="card">
-          <h3>Payouts</h3>
-          <p>View and manage payouts to connected accounts.</p>
-          <div id="payouts-placeholder">No payouts loaded yet.</div>
-        </div>
-      `;
-    }
-
-    function renderOnboarding() {
-      setActiveLink('/onboarding');
-      const c = document.getElementById('content');
-      c.innerHTML = `
-        <div class="card">
-          <h3>Onboarding</h3>
-          <p>Onboard merchants (Stripe Connect) via Express/Custom flow.</p>
-          <p>Hook this UI to your onboarding endpoints as you finalize the backend.</p>
-        </div>
-      `;
-    }
-
-    function setActiveLink(route) {
-      document.querySelectorAll('#admin-nav .nav-link').forEach(a => {
+    function setActive(route) {
+      document.querySelectorAll('#adminNav .nav-link').forEach(a => {
         a.classList.toggle('active', a.getAttribute('data-route') === route);
       });
     }
 
-    // Simple hash-router init
+    function renderMerchants() {
+      setActive('/merchants');
+      const panel = document.getElementById('panel');
+      panel.innerHTML = `
+        <h2>Merchants</h2>
+        <p style="color:#64748b;">Admin view to create/manage merchants and their Stripe Connect accounts.</p>
+        <button id="load-merchants">Load Merchants</button>
+        <div id="merchants-table" style="margin-top:12px;"></div>
+      `;
+      document.getElementById('load-merchants').addEventListener('click', () => {
+        fetch('/admin/merchants').then(r => r.json()).then(data => {
+          const tbl = document.getElementById('merchants-table');
+          if (!data || !data.merchants) {
+            tbl.innerHTML = '<p>No merchants found.</p>';
+            return;
+          }
+          tbl.innerHTML = `
+            <table>
+              <thead><tr><th>Client Code</th><th>Name</th><th>Connect ID</th><th>Status</th></tr></thead>
+              <tbody>${data.merchants.map(m => `
+                <tr><td>${m.clientCode || ''}</td><td>${m.name || ''}</td><td>${m.connect_id || ''}</td><td>${m.status || ''}</td></tr>
+              `).join('')}</tbody>
+            </table>
+          `;
+        }).catch(() => {
+          document.getElementById('merchants-table').innerHTML = '<p>Error loading merchants.</p>';
+        });
+      });
+    }
+
+    function renderPayments() {
+      setActive('/payments');
+      const panel = document.getElementById('panel');
+      panel.innerHTML = `
+        <h2>Payments</h2>
+        <p style="color:#64748b;">Overview of payments per client.</p>
+        <button id="load-payments">Load Payments</button>
+        <div id="payments-table" style="margin-top:12px;"></div>
+      `;
+      document.getElementById('load-payments').addEventListener('click', () => {
+        fetch('/admin/payments').then(r => r.json()).then(data => {
+          const tbl = document.getElementById('payments-table');
+          if (!data || !data.payments) {
+            tbl.innerHTML = '<p>No payments found.</p>';
+            return;
+          }
+          tbl.innerHTML = `
+            <table>
+              <thead><tr><th>Payment ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th></tr></thead>
+              <tbody>${data.payments.map(p => `
+                <tr><td>${p.id || ''}</td><td>${p.clientCode || ''}</td><td>${p.amount || ''}</td><td>${p.currency || ''}</td><td>${p.status || ''}</td></tr>
+              `).join('')}</tbody>
+            </table>
+          `;
+        }).catch(() => {
+          document.getElementById('payments-table').innerHTML = '<p>Error loading payments.</p>';
+        });
+      });
+    }
+
+    function renderPayouts() {
+      setActive('/payouts');
+      const panel = document.getElementById('panel');
+      panel.innerHTML = `
+        <h2>Payouts</h2>
+        <p style="color:#64748b;">View and manage payouts to connected accounts (stub).</p>
+        <div id="payouts-placeholder">No payouts loaded yet.</div>
+      `;
+    }
+
+    function renderOnboarding() {
+      setActive('/onboarding');
+      const panel = document.getElementById('panel');
+      panel.innerHTML = `
+        <h2>Onboarding</h2>
+        <p style="color:#64748b;">Onboard merchants via Stripe Connect. Wire endpoints here as you finalize backend.</p>
+      `;
+    }
+
+    // Init
     window.addEventListener('hashchange', () => {
-      const r = location.hash.replace('#','') || '/merchants';
+      const r = location.hash.replace('#', '') || '/merchants';
       if (routes[r]) routes[r]();
       else routes['/merchants']();
     });
     if (!location.hash) location.hash = '#/merchants';
-    const initial = location.hash.replace('#','');
+    const initial = location.hash.replace('#', '');
     if (routes[initial]) routes[initial]();
   </script>
 </body>
-</html>
+</html> 
