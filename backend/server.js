@@ -75,6 +75,7 @@ app.post('/api/create-payment-intent', async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: cents,
       currency,
+      // If you need to attach per-merchant context, add metadata here
       automatic_payment_methods: { enabled: true },
       metadata: { source: 'uniquity-api', ...(req.body?.metadata || {}) }
     });
