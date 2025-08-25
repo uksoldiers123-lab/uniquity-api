@@ -7,7 +7,6 @@ const SUPABASE_JWKS_URL = process.env.SUPABASE_JWKS_URL;
 // Placeholder: swap in a real JWKS-based verifier against Supabase
 async function verifySupabaseJwt(token) {
   try {
-    // Placeholder: decode only (do not rely on this in production)
     const payload = jwt.decode(token, { complete: true });
     return payload ? payload.payload : null;
   } catch {
