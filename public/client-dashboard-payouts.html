@@ -1,0 +1,29 @@
+<section id="payouts" class="card" aria-label="Payouts">
+  <div class="section-title" style="text-transform:uppercase; font-size:12px; color:#64748b;">Payouts</div>
+  <div class="payout-stats" id="payout-stats" style="display:flex; gap:20px; align-items:center; margin:12px 0;">
+    <div>Available: <strong id="balance-available">$0.00</strong></div>
+    <div>Last payout: <span id="last-payout">—</span></div>
+  </div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <input id="payout-amount" type="number" min="1" placeholder="Amount in cents" />
+    <button id="do-payout" class="btn" onclick="doPayout()">Payout now</button>
+  </div>
+  <div id="payout-history" style="margin-top:16px;">
+    <!-- dynamically filled -->
+  </div>
+</section>
+<script>
+async function doPayout() {
+  const clientId = 'CLIENT_ID_FROM_TOKEN_OR_ROUTE'; // replace with real clientId from auth
+  const amount = Number(document.getElementById('payout-amount').value);
+  if (!amount) { alert('Enter an amount.'); return; }
+  const resp = await fetch(`/client/${clientId}/payouts/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, currency: 'usd' })
+  });
+  const data = await resp.json();
+  // handle response
+  console.log(data);
+}
+</script>
