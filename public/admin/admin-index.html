@@ -1,30 +1,32 @@
 <!doctype html>
+
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Uniquity Solutions - Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Admin CSS (unified) -->
   <link rel="stylesheet" href="admin-styles.css" />
   <style>
-    /* Inline placeholders for quick render if you don’t use a templating engine */
+    /* Inline placeholders for safe theming (to be replaced server-side from env) */
     :root {
-      --brand: {{ BRAND }};
-      --bg: {{ BG }};
-      --text: {{ TEXT }};
-      --muted: {{ MUTED }};
-      --card-bg: {{ CARD_BG }};
-      --shadow: {{ SHADOW }};
-      --radius: {{ RADIUS }};
-      --gap: 14px;
+      --brand: {{ BRAND }};        /* e.g., #1f2a44 */
+      --bg: {{ BG }};                /* e.g., #f5f7fa */
+      --text: {{ TEXT }};            /* e.g., #333 */
+      --muted: {{ MUTED }};          /* e.g., #6b7280 */
+      --card-bg: {{ CARD_BG }};      /* e.g., #ffffff */
+      --shadow: {{ SHADOW }};         /* e.g., 0 2px 8px rgba(0,0,0,.08) */
+      --radius: {{ RADIUS }};         /* e.g., 12px */
     }
   </style>
 </head>
 <body>
-  <header class="brand" role="banner" aria-label="Admin header">
-    <div style="display:flex; align-items:center;">
+  <header class="brand" role="banner" aria-label="Admin header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div style="display:flex; align-items:center; gap:12px;">
       <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-title" style="font-weight:700;">Admin Dashboard</span>
+      <span class="brand-title" style="font-weight:700; color:#fff;">Admin Dashboard</span>
     </div>
     <div style="display:flex; gap:8px;">
       <button class="btn secondary" id="openStripe">Open Stripe Dashboard</button>
@@ -38,9 +40,9 @@
       <div class="section-title">Navigation</div>
       <nav class="nav" id="admin-nav">
         <a href="#overview" class="active">Overview</a>
-        <a href="#payments">Payments</a>
-        <a href="#payouts">Payouts</a>
+        <a href="#metrics">Metrics</a>
         <a href="#roles">Roles</a>
+        <a href="#payouts">Payouts</a>
         <a href="#settings">Settings</a>
         <a href="#reports">Reports</a>
       </nav>
@@ -48,31 +50,37 @@
 
     <!-- Main content -->
     <section class="content" aria-label="Admin content area">
+      <!-- Overview with multi-timeframe charts -->
+      <section class="hero panel" id="overviewPanel" style="display:flex; flex-direction:column;">
+        <div class="section-title" style="margin-bottom:6px;">Overview</div>
+        <h1 style="margin:0 0 6px;">Over 20 years of admin operations</h1>
+        <p class="text-muted" style="margin:0 0 12px;">
+          A unified admin UI showing funds, admin fees, and payouts across all connected client accounts.
+        </p>
 
-      <!-- Overview with charts (hour/day/week/month/quarter/year/all time) -->
-      <section class="hero panel" id="overview">
-        <div class="section-title">Overview</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="card" style="min-height:180px;">
+        <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap:16px;">
+          <div class="card" aria-label="Funds by time">
             <div class="section-title" style="margin-bottom:6px;">Funds by Time</div>
-            <canvas id="fundsChart" height="180" style="width:100%;"></canvas>
+            <canvas id="fundsChart" height="180"></canvas>
+            <div class="chart-legend text-muted" style="margin-top:6px;">
+              <span>Time buckets: Hour, Day, Week, Month, Quarter, Year, All Time</span>
+            </div>
           </div>
-          <div class="card" style="min-height:180px;">
+          <div class="card" aria-label="Admin fees by time">
             <div class="section-title" style="margin-bottom:6px;">Admin Fees by Time</div>
-            <canvas id="feesChart" height="180" style="width:100%;"></canvas>
+            <canvas id="feesChart" height="180"></canvas>
           </div>
         </div>
 
-        <div class="grid" style="margin-top:12px;">
-          <div class="card">
-            <div class="section-title">All Accounts Revenue</div>
+        <div class="grid" style="grid-template-columns: repeat(2, 1fr); margin-top:12px;">
+          <div class="card" aria-label="All accounts revenue">
+            <div class="section-title" style="margin-bottom:6px;">All Accounts Revenue</div>
             <div id="allAccountsRevenue" style="font-size:22px; font-weight:700;">$0.00</div>
-            <div class="text-muted" id="allAccountsCaption" style="margin-top:6px;">Total across connected client accounts</div>
+            <div class="text-muted" id="allAccountsCaption" style="margin-top:6px;">Total revenue across all client accounts</div>
           </div>
-
-          <div class="card">
-            <div class="section-title">Time Window</div>
-            <div id="timeWindowControls" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="card" aria-label="Time range controls">
+            <div class="section-title" style="margin-bottom:6px;">Time Range</div>
+            <div id="time-range-buttons" style="display:flex; flex-wrap:wrap; gap:8px;">
               <button class="btn secondary" data-range="hour">Hour</button>
               <button class="btn secondary" data-range="day">Day</button>
               <button class="btn secondary" data-range="week">Week</button>
@@ -85,11 +93,11 @@
         </div>
       </section>
 
-      <!-- Roles & Permissions -->
-      <section class="card panel" id="roles" aria-label="Roles management" style="margin-top:8px;">
+      <!-- Roles & permissions -->
+      <section class="panel" id="roles" aria-label="Roles management" style="margin-top:16px;">
         <div class="section-title">Roles & Permissions</div>
         <div class="grid" style="grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="card" style="min-height: 180px;">
+          <div class="card" aria-label="Assign role">
             <div class="section-title" style="margin-bottom:6px;">Assign Roles</div>
             <form id="role-form" onsubmit="return false;">
               <div class="field" style="margin-bottom:8px;">
@@ -104,16 +112,16 @@
                   <option value="viewer">Viewer</option>
                 </select>
               </div>
-              <button class="btn" type="submit" id="assignRoleBtn">Assign Role</button>
+              <button class="btn" id="assignRoleBtn">Assign Role</button>
             </form>
-            <div id="role-status" class="text-muted" style="margin-top:8px;"></div>
+            <div id="role-status" class="text-muted" style="margin-top:6px;"></div>
           </div>
 
-          <div class="card" style="min-height: 180px;">
+          <div class="card" aria-label="Roles overview">
             <div class="section-title" style="margin-bottom:6px;">Roles Quick Overview</div>
             <ul id="roles-list" style="margin:0; padding-left:16px;">
               <li>Admin: full access</li>
-              <li>Manager: limited write access</li>
+              <li>Manager: restricted write access</li>
               <li>Viewer: read-only</li>
             </ul>
           </div>
@@ -121,13 +129,13 @@
       </section>
 
       <!-- Payout configuration -->
-      <section class="card panel" id="payouts" aria-label="Payout configuration" style="margin-top:8px;">
+      <section class="panel" id="payouts" aria-label="Payout configuration" style="margin-top:16px;">
         <div class="section-title">Payout Configuration</div>
         <div class="grid" style="grid-template-columns: 1fr 1fr; gap:12px;">
           <div class="card" style="min-height: 120px;">
             <div class="section-title" style="margin-bottom:6px;">Owner Percentage</div>
             <input id="owner-percent" type="number" min="0" max="100" step="0.1" value="70" style="width:100%; padding:8px;" />
-            <div class="text-muted" style="margin-top:6px;">Share of gross after Stripe fees and expenses that goes to owners</div>
+            <div class="text-muted" style="margin-top:6px;">Share of gross after Stripe fees</div>
           </div>
           <div class="card" style="min-height: 120px;">
             <div class="section-title" style="margin-bottom:6px;">Treasury Percentage</div>
@@ -141,24 +149,23 @@
         </div>
       </section>
 
-      <!-- All-time metrics / activity panel -->
-      <section class="card panel" id="accounts-all" aria-label="All accounts metrics" style="margin-top:8px;">
+      <!-- All-time metrics panel -->
+      <section class="panel" id="accounts-all" aria-label="All accounts metrics" style="margin-top:16px;">
         <div class="section-title">All Accounts - Revenue by Time</div>
-        <div class="grid" style="grid-template-columns: 1fr; gap:12px;">
-          <div class="chart" id="allTimeChart">All-time revenue chart placeholder</div>
+        <div class="chart" id="allTimeChart" style="height:240px; display:flex; align-items:center; justify-content:center;">
+          All-time revenue chart placeholder
         </div>
       </section>
 
-      <!-- Bottom: Data export / Sync -->
-      <section class="card panel" id="data-sync" aria-label="Data sync" style="margin-top:8px;">
+      <!-- Data sync/export -->
+      <section class="panel" id="data-sync" aria-label="Data sync" style="margin-top:16px;">
         <div class="section-title">Data & Sync</div>
         <div style="display:flex; gap:8px; align-items:center;">
           <button class="btn" id="syncBtn">Sync Data</button>
           <button class="btn secondary" id="exportBtn">Export CSV</button>
         </div>
-        <div class="text-muted" style="margin-top:6px;">Pull latest data from Stripe and Supabase; update all charts and tables</div>
+        <div class="text-muted" style="margin-top:6px;">Pull latest data from Stripe and Supabase; update charts</div>
       </section>
-
     </section>
   </div>
 
@@ -166,3 +173,4 @@
   <script src="admin-dashboard.js"></script>
 </body>
 </html>
+
