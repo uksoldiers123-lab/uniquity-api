@@ -1,20 +1,15 @@
-/* 
-  Server bootstrap for the client dashboard + admin (via Supabase-auth)
-  Exposes /client-dashboard/* endpoints and Stripe webhook handler
-  Now reads all keys from .env and keeps the structure consistent with your image styling.
-*/
 const express = require('express');
 const Stripe = require('stripe');
 const cors = require('cors');
 const { createClientDashboardRouter } = require('./routes/client-dashboard');
 const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
 
-// Optional: Supabase auth middleware (replace with real)
+// Optional: Supabase auth middleware (swap in later)
  // const { supabaseAuthMiddleware } = require('./middleware/supabase-auth');
 
 const app = express();
 
-// Env vars (read from .env in dev)
+// Env vars (read from .env)
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 if (!STRIPE_SECRET_KEY) {
   console.error('Missing STRIPE_SECRET_KEY');
@@ -28,7 +23,6 @@ const ALLOWED_ORIGINS = (
   `${APP_BASE_URL},https://dashboard.uniquitysolutions.com`
 ).split(',').map(s => s.trim()).filter(Boolean);
 
-// Middlewares
 app.use(cors({
   origin: function(origin, cb) {
     if (!origin) return cb(null, true);
@@ -39,7 +33,6 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Attach Stripe instance to app for routes to reuse
 app.set('stripe', stripe);
 
 // Routes
