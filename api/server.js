@@ -1,3 +1,8 @@
+/* 
+  Server bootstrap for the client dashboard + admin (via Supabase-auth)
+  Exposes /client-dashboard/* endpoints and Stripe webhook handler
+  Now reads all keys from .env and keeps the structure consistent with your image styling.
+*/
 const express = require('express');
 const Stripe = require('stripe');
 const cors = require('cors');
@@ -5,13 +10,11 @@ const { createClientDashboardRouter } = require('./routes/client-dashboard');
 const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
 
 // Optional: Supabase auth middleware (replace with real)
- // const { supabaseAuthMiddleware } = require('../middleware/supabase-auth');
+ // const { supabaseAuthMiddleware } = require('./middleware/supabase-auth');
 
 const app = express();
 
-// Env vars (replace with real values)
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ziltrcaehpshkwganlcy.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'public-anon-key';
+// Env vars (read from .env in dev)
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 if (!STRIPE_SECRET_KEY) {
   console.error('Missing STRIPE_SECRET_KEY');
@@ -35,9 +38,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Id']
 }));
 app.use(express.json());
-
-// Simple health check
-app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 // Attach Stripe instance to app for routes to reuse
 app.set('stripe', stripe);
