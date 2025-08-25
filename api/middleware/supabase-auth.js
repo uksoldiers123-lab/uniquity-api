@@ -1,29 +1,46 @@
-const jwt = require('jsonwebtoken');
-const axios = require('axios');
+const express = require('express');
+const Stripe = require('stripe');
+const cors = require('cors');
+const { createClientDashboardRouter } = require('./routes/client-dashboard');
+const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
 
-// New: read JWKS URL from env for JWT verification
-const SUPABASE_JWKS_URL = process.env.SUPABASE_JWKS_URL;
+// Optional: Supabase auth middleware (swap in later)
+ // const { supabaseAuthMiddleware } = require('./middleware/supabase-auth');
 
-// Placeholder: swap in a real JWKS-based verifier against Supabase
-async function verifySupabaseJwt(token) {
-  try {
-    const payload = jwt.decode(token, { complete: true });
-    return payload ? payload.payload : null;
-  } catch {
-    return null;
-  }
+const app = express();
+
+// Env vars (read from .env)
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+if (!STRIPE_SECRET_KEY) {
+  console.error('Missing STRIPE_SECRET_KEY');
+  process.exit(1);
 }
+const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
 
-async function supabaseAuthMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization || '';
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  const claims = await verifySupabaseJwt(parts[1]);
-  if (!claims) return res.status(401).json({ error: 'Invalid token' });
-  req.user = claims;
-  next();
-}
+const APP_BASE_URL = process.env.APP_BASE_URL || 'https://uniquitysolutions.com';
+const ALLOWED_ORIGINS = (
+  process.env.ALLOWED_ORIGINS ||
+  `${APP_BASE_URL},https://dashboard.uniquitysolutions.com`
+).split(',').map(s => s.trim()).filter(Boolean);
 
-module.exports = { supabaseAuthMiddleware };
+app.use(cors({
+  origin: function(origin, cb) {
+    if (!origin) return cb(null, true);
+    cb(null, ALLOWED_ORIGINS.includes(origin));
+  },
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Id']
+}));
+app.use(express.json());
+
+app.set('stripe', stripe);
+
+// Routes
+const clientDashboardRouter = createClientDashboardRouter();
+app.use('/client-dashboard', clientDashboardRouter);
+
+// Stripe webhooks
+const webhookRouter = createStripeWebhookRouter(stripe);
+app.use('/webhooks/stripe', webhookRouter);
+
+module.exports = app;
