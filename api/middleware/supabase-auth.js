@@ -1,12 +1,13 @@
 const jwt = require('jsonwebtoken');
-const jwkToPem = require('jwk-to-pem');
 const axios = require('axios');
 
-// Simple, not-production-ready placeholder for Supabase JWT verification
-// In production, fetch public keys from Supabase (JWKS) and verify the token.
+// New: read JWKS URL from env for JWT verification (proper verifier to be plugged in)
+const SUPABASE_JWKS_URL = process.env.SUPABASE_JWKS_URL;
+
+// Placeholder: swap in a real JWKS-based verifier against Supabase
 async function verifySupabaseJwt(token) {
-  // Placeholder: decode without verification (DO NOT use in prod)
   try {
+    // Placeholder: decode only (do not rely on this in production)
     const payload = jwt.decode(token, { complete: true });
     return payload ? payload.payload : null;
   } catch {
@@ -16,13 +17,12 @@ async function verifySupabaseJwt(token) {
 
 async function supabaseAuthMiddleware(req, res, next) {
   const authHeader = req.headers.authorization || '';
-  const [scheme, token] = authHeader.split(' ');
-  if (!token || scheme.toLowerCase() !== 'bearer') {
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  const claims = await verifySupabaseJwt(token);
+  const claims = await verifySupabaseJwt(parts[1]);
   if (!claims) return res.status(401).json({ error: 'Invalid token' });
-  // Attach user to request (customize fields as per your app_metadata)
   req.user = claims;
   next();
 }
