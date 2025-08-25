@@ -2,198 +2,191 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Uniquity Solutions – Client Dashboard</title>
+  <title>Uniquity Solutions - Client Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --brand: #FF6F00;
-      --brand-dark: #e65a00;
-      --bg: #f7f7fb;
+      --bg: #96A3B1;           /* grayish blue */
+      --text: #1f2937;         /* slate */
+      --muted: #4b5563;        /* muted text */
       --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
+      --primary: #e94b4b;       /* red highlight */
+      --primary-700: #d13f3f;
+      --accent: #fbbf24;        /* yellow highlight */
+      --ring: rgba(0,0,0,.08);
+      --shadow: 0 10px 30px rgba(2,6,23,.15);
+      --radius: 18px;
+      --nav-h: 56px;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto; color: var(--text); background: var(--bg); }
-
-    /* Global layout similar to your admin/landing vibe */
-    .app {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 16px;
-      min-height: 100vh;
+    html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+    .nav {
+      position: sticky; top: 0; z-index: 1100;
+      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,.15);
     }
-    header.brand {
-      grid-column: 1 / -1;
-      background: var(--brand);
-      color: #fff;
-      padding: 14px 20px;
-      display: flex; align-items: center; justify-content: space-between;
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 6px;
+      background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+    .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+    aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; }
+
+    main { display: grid; gap: 16px; align-content: start; }
+
+    .panel { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; min-height: 180px; }
+    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
+
+    h1, h2 { margin: 0 0 8px; }
+    .hero { padding: 28px; border-radius: 14px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 6px 20px rgba(0,0,0,.04); }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
     }
-    .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display: inline-block; margin-right: 8px; }
-    .brand-title { font-weight: 700; }
 
-    aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
-
-    main { padding: 20px; display: grid; gap: 16px; align-content: start; }
-
-    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: .5px; margin-bottom: 6px; }
-
-    .panel { padding: 16px; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; min-height: 220px; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
-    .card { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
 
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
 
-    .btn { background: var(--brand); color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn.secondary { background: #fff; color: var(--brand); border: 1px solid var(--brand); }
+    .btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .btn.secondary { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
 
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; }
-      header.brand { position: sticky; top: 0; z-index: 10; }
-    }
+    /* Subtle color chips for status */
+    .chip { display:inline-block; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; font-size: 12px; }
+
   </style>
 </head>
 <body>
-  <header class="brand" aria-label="Brand header">
-    <div style="display:flex; align-items:center;">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-title">Uniquity Solutions Client Dashboard</span>
-    </div>
-    <div>
-      <a class="btn" href="#" id="openStripe" style="margin-right:8px;">Open Stripe Dashboard</a>
-      <button class="btn secondary" id="logoutBtn" style="display:none;">Logout</button>
-    </div>
-  </header>
-
-  <aside aria-label="Left navigation" style="width:260px;">
-    <div class="section-title">Navigation</div>
-    <nav>
-      <a href="#/overview">Overview</a><br/>
-      <a href="#/payments">Payments</a><br/>
-      <a href="#/onboarding">Onboarding</a><br/>
-      <a href="#/payouts">Payouts</a><br/>
-    </nav>
-  </aside>
-
-  <main aria-label="Main dashboard content">
-    <section class="card panel" id="overviewPanel">
-      <div class="section-title">Overview</div>
-      <h2 style="margin:0 0 6px;">Over 20 years of trusted payments</h2>
-      <p style="color:#64748b; margin:0;">
-        Welcome to your Uniquity Solutions dashboard to view your data, payments, payouts, and onboarding status. Thank you for choosing US.
-      </p>
-      <div style="margin-top:12px;">
-        <button class="btn" id="refreshBatch">Refresh Data</button>
+  <nav class="nav" aria-label="Main">
+    <div class="nav-inner container">
+      <div class="brand" aria-label="Brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Uniquity Solutions</span>
       </div>
-    </section>
+      <div>
+        <a class="btn" href="#" id="openStripe">Open Stripe Dashboard</a>
+      </div>
+    </div>
+  </nav>
 
-    <section class="grid-2" aria-label="Charts and tables" style="margin-top:12px;">
-      <section class="panel" id="chartsPanel">
-        <div class="section-title">Charts</div>
-        <canvas id="paymentsChart" height="180"></canvas>
-      </section>
+  <div class="container layout" id="layout">
+    <aside aria-label="Sidebar navigation">
+      <div class="section-title">Overview</div>
+      <div class="card" style="margin-bottom:12px;">
+        This panel shows your client data, including payments, payouts, and onboarding status.
+      </div>
+      <div class="section-title" style="margin-top:8px;">Navigation</div>
+      <ul style="list-style:none; padding:0; margin:0;">
+        <li><a href="#/overview">Overview</a></li>
+        <li><a href="#/payments">Payments</a></li>
+        <li><a href="#/payouts">Payouts</a></li>
+        <li><a href="#/onboarding">Onboarding</a></li>
+      </ul>
+    </aside>
 
-      <section class="panel" id="summaryPanel">
-        <div class="section-title">Summary</div>
-        <div id="summaryContent">
-          Balance: <strong>$0.00</strong><br/>
-          Pending: <strong>$0.00</strong><br/>
-          Last payout: <span id="lastPayout">—</span>
+    <main aria-label="Main dashboard content">
+      <section class="hero panel" id="overviewPanel" style="display:flex; flex-direction:column;">
+        <div class="section-title" style="margin-bottom:6px;">Overview</div>
+        <h1>Over 20 years paid on time</h1>
+        <p class="lead" style="color:#64748b;">
+          A modern admin UI branded in orange and gray, showing your Stripe Connect data, payments, and payouts in a consistent, responsive layout.
+        </p>
+        <div class="grid" style="grid-template-columns:1fr 1fr;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Balance</div>
+            <div id="balance" style="font-size:22px; font-weight:700;">$0.00</div>
+            <div class="chip" id="balance-chip" style="margin-top:6px;">Available</div>
+          </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Last Payout</div>
+            <div id="last-payout" style="font-weight:700;">—</div>
+          </div>
         </div>
       </section>
-    </section>
 
-    <section class="panel" id="paymentsPanel" style="margin-top:16px;">
-      <div class="section-title">Recent Payments</div>
-      <table id="paymentsTable">
-        <thead><tr><th>ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <section class="panel" id="payoutsPanel" style="margin-top:16px;">
-      <div class="section-title">Payouts</div>
-      <div id="payoutsHistory">
-        <table>
-          <thead><tr><th>Payout ID</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody id="payoutsBody"></tbody>
+      <section class="panel" id="paymentsPanel">
+        <div class="section-title">Recent Payments</div>
+        <table id="payments-table">
+          <thead><tr><th>ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody></tbody>
         </table>
-      </div>
-      <div style="margin-top:8px;">
-        <input id="payoutAmount" type="number" placeholder="Amount (in smallest currency unit)" />
-        <button class="btn" id="doPayoutBtn">Payout now</button>
-      </div>
-    </section>
+      </section>
 
-    <section class="panel" id="onboardingPanel" style="margin-top:16px;">
-      <div class="section-title">Onboarding</div>
-      <div id="onboardingContent">
-        Onboard your Uniquity Solutions sponsored Stripe Connect account from this Dashboard. A status badge will show onboarding progress and a URL to complete onboarding if needed.
-      </div>
-    </section>
-  </main>
+      <section class="panel" id="payoutsPanel" style="display:block;">
+        <div class="section-title">Payouts</div>
+        <div id="payouts-history">
+          <table>
+            <thead><tr><th>Payout ID</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="payouts-tbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;">
+          <input id="payout-amount" type="number" placeholder="Amount (smallest unit)" />
+          <button class="btn" id="payout-now">Payout now</button>
+        </div>
+      </section>
+
+      <section class="panel" id="onboardingPanel" style="display:block;">
+        <div class="section-title">Onboarding</div>
+        <div id="onboarding-content">
+          Onboard your Stripe Connect account. You’ll see onboarding status and links here.
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
-    // Replace with real auth to extract clientId from JWT; placeholder:
+    // In real usage, derive clientId from a login token. This is a placeholder.
     const clientId = 'CLIENT_ID_FROM_TOKEN';
 
-    // Dummy data fetch (replace with real endpoints)
     async function loadData() {
       // Payments
-      const resP = await fetch(`/client/${clientId}/payments`);
-      const payments = await resP.json();
+      const r1 = await fetch(`/client/${clientId}/payments`);
+      const payments = await r1.json();
+      const tBody = document.querySelector('#payments-table tbody');
+      tBody.innerHTML = payments.payments?.map(p => `
+        <tr><td>${p.id || ''}</td><td>${p.clientCode || ''}</td><td>${p.amount || ''}</td><td>${p.currency || ''}</td><td>${p.status || ''}</td><td>${p.created_at || ''}</td></tr>`).join('') || '';
+
       // Payouts
-      const resPa = await fetch(`/client/${clientId}/payouts`);
-      const payouts = await resPa.json();
-      // Update UI with placeholder data
-      // Populate payments table
-      const tBody = document.querySelector('#paymentsTable tbody');
-      tBody.innerHTML = '';
-      (payments.payments || []).forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.id || ''}</td><td>${p.clientCode || ''}</td><td>${p.amount || ''}</td><td>${p.currency || ''}</td><td>${p.status || ''}</td><td>${p.created_at || ''}</td>`;
-        tBody.appendChild(tr);
-      });
-      // Payouts
-      const pb = document.getElementById('payoutsBody');
-      pb.innerHTML = '';
-      (payouts.payouts || []).forEach(pp => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${pp.payout_id || ''}</td><td>${pp.amount || ''}</td><td>${pp.currency || ''}</td><td>${pp.status || ''}</td><td>${pp.created_at || ''}</td>`;
-        pb.appendChild(tr);
-      });
-      // Summary / charts would be updated similarly
+      const r2 = await fetch(`/client/${clientId}/payouts`);
+      const payouts = await r2.json();
+      const pBody = document.getElementById('payouts-tbody');
+      pBody.innerHTML = payouts.payouts?.map(pp => `
+        <tr><td>${pp.payout_id || ''}</td><td>${pp.amount || ''}</td><td>${pp.currency || ''}</td><td>${pp.status || ''}</td><td>${pp.created_at || ''}</td></tr>
+      `).join('') || '';
+
+      // Last payout
+      const last = payouts.payouts?.[0]?.created_at;
+      document.getElementById('last-payout').textContent = last || '—';
     }
 
     window.addEventListener('load', loadData);
 
-    // Payout action
-    async function doPayout() {
-      const amount = Number(document.getElementById('payoutAmount').value);
-      if (!amount) { alert('Enter amount'); return; }
+    // Payout now
+    document.getElementById('payout-now').addEventListener('click', async () => {
+      const amount = Number(document.getElementById('payout-amount').value);
+      if (!amount) { alert('Enter an amount'); return; }
       const res = await fetch(`/client/${clientId}/payouts/create`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({ amount, currency: 'usd' })
       });
       const data = await res.json();
-      console.log(data);
+      console.log('Payout response', data);
       loadData();
-    }
-    document.getElementById('doPayoutBtn').addEventListener('click', doPayout);
+    });
 
     // Open Stripe Dashboard (optional)
     document.getElementById('openStripe').addEventListener('click', (e) => {
       e.preventDefault();
-      // Build a Stripe dashboard URL if you have a per-client session; placeholder
-      window.open('https://dashboard.stripe.com/connect/accounts/' + 'CONNECTED_ACCOUNT_ID', '_blank');
+      window.open('https://dashboard.stripe.com/connect/accounts/CONNECTED_ACCOUNT_ID', '_blank');
     });
   </script>
 </body>
-        </html>
+</html>
