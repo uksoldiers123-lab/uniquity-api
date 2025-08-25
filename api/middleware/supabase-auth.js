@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
-// New: read JWKS URL from env for JWT verification (proper verifier to be plugged in)
+// New: read JWKS URL from env for JWT verification
 const SUPABASE_JWKS_URL = process.env.SUPABASE_JWKS_URL;
 
 // Placeholder: swap in a real JWKS-based verifier against Supabase
