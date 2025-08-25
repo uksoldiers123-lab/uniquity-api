@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Uniquity Solutions – Client Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #FF6F00;
+      --brand-dark: #e65a00;
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto; color: var(--text); background: var(--bg); }
+
+    /* Global layout similar to your admin/landing vibe */
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 16px;
+      min-height: 100vh;
+    }
+    header.brand {
+      grid-column: 1 / -1;
+      background: var(--brand);
+      color: #fff;
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display: inline-block; margin-right: 8px; }
+    .brand-title { font-weight: 700; }
+
+    aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+
+    main { padding: 20px; display: grid; gap: 16px; align-content: start; }
+
+    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: .5px; margin-bottom: 6px; }
+
+    .panel { padding: 16px; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; min-height: 220px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .card { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+
+    .btn { background: var(--brand); color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn.secondary { background: #fff; color: var(--brand); border: 1px solid var(--brand); }
+
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      header.brand { position: sticky; top: 0; z-index: 10; }
+    }
+  </style>
+</head>
+<body>
+  <header class="brand" aria-label="Brand header">
+    <div style="display:flex; align-items:center;">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-title">Uniquity Solutions Client Dashboard</span>
+    </div>
+    <div>
+      <a class="btn" href="#" id="openStripe" style="margin-right:8px;">Open Stripe Dashboard</a>
+      <button class="btn secondary" id="logoutBtn" style="display:none;">Logout</button>
+    </div>
+  </header>
+
+  <aside aria-label="Left navigation" style="width:260px;">
+    <div class="section-title">Navigation</div>
+    <nav>
+      <a href="#/overview">Overview</a><br/>
+      <a href="#/payments">Payments</a><br/>
+      <a href="#/onboarding">Onboarding</a><br/>
+      <a href="#/payouts">Payouts</a><br/>
+    </nav>
+  </aside>
+
+  <main aria-label="Main dashboard content">
+    <section class="card panel" id="overviewPanel">
+      <div class="section-title">Overview</div>
+      <h2 style="margin:0 0 6px;">Over 20 years of trusted payments</h2>
+      <p style="color:#64748b; margin:0;">
+        A clean, branded admin-like dashboard to view your Stripe Connect data, payments, payouts, and onboarding status without requiring you to visit Stripe's UI.
+      </p>
+      <div style="margin-top:12px;">
+        <button class="btn" id="refreshBatch">Refresh Data</button>
+      </div>
+    </section>
+
+    <section class="grid-2" aria-label="Charts and tables" style="margin-top:12px;">
+      <section class="panel" id="chartsPanel">
+        <div class="section-title">Charts</div>
+        <canvas id="paymentsChart" height="180"></canvas>
+      </section>
+
+      <section class="panel" id="summaryPanel">
+        <div class="section-title">Summary</div>
+        <div id="summaryContent">
+          Balance: <strong>$0.00</strong><br/>
+          Pending: <strong>$0.00</strong><br/>
+          Last payout: <span id="lastPayout">—</span>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel" id="paymentsPanel" style="margin-top:16px;">
+      <div class="section-title">Recent Payments</div>
+      <table id="paymentsTable">
+        <thead><tr><th>ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="panel" id="payoutsPanel" style="margin-top:16px;">
+      <div class="section-title">Payouts</div>
+      <div id="payoutsHistory">
+        <table>
+          <thead><tr><th>Payout ID</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="payoutsBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;">
+        <input id="payoutAmount" type="number" placeholder="Amount (in smallest currency unit)" />
+        <button class="btn" id="doPayoutBtn">Payout now</button>
+      </div>
+    </section>
+
+    <section class="panel" id="onboardingPanel" style="margin-top:16px;">
+      <div class="section-title">Onboarding</div>
+      <div id="onboardingContent">
+        Onboard your Stripe Connect account from this UI. A status badge will show onboarding progress and a URL to complete onboarding if needed.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Replace with real auth to extract clientId from JWT; placeholder:
+    const clientId = 'CLIENT_ID_FROM_TOKEN';
+
+    // Dummy data fetch (replace with real endpoints)
+    async function loadData() {
+      // Payments
+      const resP = await fetch(`/client/${clientId}/payments`);
+      const payments = await resP.json();
+      // Payouts
+      const resPa = await fetch(`/client/${clientId}/payouts`);
+      const payouts = await resPa.json();
+      // Update UI with placeholder data
+      // Populate payments table
+      const tBody = document.querySelector('#paymentsTable tbody');
+      tBody.innerHTML = '';
+      (payments.payments || []).forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.id || ''}</td><td>${p.clientCode || ''}</td><td>${p.amount || ''}</td><td>${p.currency || ''}</td><td>${p.status || ''}</td><td>${p.created_at || ''}</td>`;
+        tBody.appendChild(tr);
+      });
+      // Payouts
+      const pb = document.getElementById('payoutsBody');
+      pb.innerHTML = '';
+      (payouts.payouts || []).forEach(pp => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${pp.payout_id || ''}</td><td>${pp.amount || ''}</td><td>${pp.currency || ''}</td><td>${pp.status || ''}</td><td>${pp.created_at || ''}</td>`;
+        pb.appendChild(tr);
+      });
+      // Summary / charts would be updated similarly
+    }
+
+    window.addEventListener('load', loadData);
+
+    // Payout action
+    async function doPayout() {
+      const amount = Number(document.getElementById('payoutAmount').value);
+      if (!amount) { alert('Enter amount'); return; }
+      const res = await fetch(`/client/${clientId}/payouts/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, currency: 'usd' })
+      });
+      const data = await res.json();
+      console.log(data);
+      loadData();
+    }
+    document.getElementById('doPayoutBtn').addEventListener('click', doPayout);
+
+    // Open Stripe Dashboard (optional)
+    document.getElementById('openStripe').addEventListener('click', (e) => {
+      e.preventDefault();
+      // Build a Stripe dashboard URL if you have a per-client session; placeholder
+      window.open('https://dashboard.stripe.com/connect/accounts/' + 'CONNECTED_ACCOUNT_ID', '_blank');
+    });
+  </script>
+</body>
+        </html>
