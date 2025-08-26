@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Uniquity Solutions - Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+:root {
+  --bg: #96A3B1;
+  --text: #1f2937;
+  --muted: #4b5563;
+  --card: #ffffff;
+  --primary: #e94b4b;
+  --primary-700: #d13f3f;
+  --accent: #fbbf24;
+  --ring: rgba(0,0,0,.08);
+  --shadow: 0 10px 30px rgba(2,6,23,.15);
+  --radius: 18px;
+  --nav-h: 56px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+/* Top nav */
+.nav {
+  position: sticky; top: 0; z-index: 1100;
+  background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  height: var(--nav-h);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+.brand-mark { width: 28px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+/* Layout: sidebar + main content */
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; }
+main { display: grid; gap: 16px; align-content: start; }
+
+/* Panels */
+.panel { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; min-height: 180px; }
+
+.section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
+h1, h2 { margin: 0 0 8px; }
+
+/* Hero/Overview styling */
+.hero { padding: 28px; border-radius: 14px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 6px 20px rgba(0,0,0,.04); }
+
+/* Grids and responsiveness */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr; }
+}
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+
+/* Buttons & inputs */
+.btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn.secondary { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.chip { display:inline-block; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; font-size: 12px; }
+
+.section { margin-bottom: 14px; }
+.input, select { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+
+/* Basic helpers for readability in this standalone file */
+.row { display: flex; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+  <!-- Shared header (mirrors client-dashboard visuals) -->
+  <nav class="nav" aria-label="Main">
+    <div class="nav-inner">
+      <div class="brand" aria-label="Brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Uniquity Solutions</span>
+      </div>
+      <div class="row" style="gap:12px;">
+        <button class="btn" id="openStripe">Open Stripe Dashboard</button>
+        <button class="btn secondary" id="toggleAdminView">Admin View</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main container: layout with sidebar and content -->
+  <div class="container layout" id="layout"
+       data-client-id="{{ENV_CLIENT_ID}}"
+       data-env-stripe-url="{{ENV_STRIPE_DASH_URL}}"
+       data-env-api-base="{{ENV_SUPABASE_API_BASE}}">
+
+    <!-- Admin Sidebar -->
+    <aside class="sidebar" aria-label="Admin Navigation">
+      <div class="section-title">Overview</div>
+      <div class="card" style="margin-bottom:12px;">
+        Admin data: RBAC, audit, Stripe-derived finances, per-tenant metrics.
+      </div>
+      <div class="section-title" style="margin-top:8px;">Navigation</div>
+      <nav aria-label="Admin Nav" style="display:block;">
+        <a href="#/overview" id="nav-overview" style="display:block; margin:6px 0;">Overview</a>
+        <a href="#/roles" id="nav-roles" style="display:block; margin:6px 0;">Roles & Permissions</a>
+        <a href="#/audit" id="nav-audit" style="display:block; margin:6px 0;">Audit Logs</a>
+        <a href="#/finances" id="nav-finances" style="display:block; margin:6px 0;">Finances</a>
+      </nav>
+    </aside>
+
+    <!-- Admin Main Content -->
+    <main aria-label="Admin dashboard content">
+
+      <!-- Overview Panel -->
+      <section class="hero panel" id="overviewPanel" style="display:flex; flex-direction:column;">
+        <div class="section-title" style="margin-bottom:6px;">Overview</div>
+        <h1>Admin Dashboard</h1>
+        <p class="lead" style="color:#64748b;">
+          RBAC, Audit, and Stripe-derived metrics across tenants. Data sourced from Supabase with Stripe integration.
+        </p>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Today’s Totals (Company)</div>
+            <div id="totals-today" style="font-size:22px; font-weight:700;">$0.00</div>
+            <div class="chip" style="margin-top:6px;" id="totals-today-chip">Live</div>
+          </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Platform Fees Today</div>
+            <div id="platform-fees" style="font-size:22px; font-weight:700;">$0.00</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Roles & Permissions -->
+      <section class="panel" id="rolesPanel" style="display:none;">
+        <div class="section-title">Roles & Permissions</div>
+        <div class="row" style="flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          <button class="btn" id="btn-create-role">Create Role</button>
+          <span class="chip" id="permission-count">Permissions: 0</span>
+        </div>
+        <table id="roles-table" aria-label="Roles table">
+          <thead><tr><th>Role</th><th>Description</th><th>Permissions</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Audit Logs -->
+      <section class="panel" id="auditPanel" style="display:none;">
+        <div class="section-title">Audit Logs</div>
+        <div class="filters" style="display:flex; flex-wrap: wrap; gap:8px; align-items:center;">
+          <input id="audit-tenant" placeholder="Tenant" class="input" />
+          <input id="audit-user" placeholder="User" class="input" />
+          <input id="audit-from" type="date" class="input" />
+          <input id="audit-to" type="date" class="input" />
+          <select id="audit-action" class="input">
+            <option value="">Any Action</option>
+            <option>create_payout</option>
+            <option>update_role</option>
+            <option>view_dashboard</option>
+            <option>record_payment</option>
+          </select>
+          <button class="btn" id="audit-search">Search</button>
+          <button class="btn secondary" id="audit-export">Export</button>
+        </div>
+        <table id="audit-table" aria-label="Audit table" style="margin-top:8px;">
+          <thead><tr><th>Timestamp</th><th>Tenant</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Finances -->
+      <section class="panel" id="financesPanel" style="display:none;">
+        <div class="section-title">Finances (Today)</div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Today by Tenant</div>
+            <table id="tenants-today" aria-label="Tenants today">
+              <thead><tr><th>Tenant</th><th>Gross</th><th>Net</th><th>Fees</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Totals</div>
+            <div id="totals-today" style="font-size:22px; font-weight:700;">$0.00</div>
+            <div style="margin-top:8px;">Stripe Fees Today: <span id="stripes-fees">$0.00</span></div>
+            <div style="margin-top:4px;">Platform Fees Today: <span id="platform-fees-today">$0.00</span></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Env placeholders (swap with real env values at build/deploy)
+    const ENV_CLIENT_ID = "{{ENV_CLIENT_ID}}";
+    const ENV_STRIPE_DASH_URL = "{{ENV_STRIPE_DASH_URL}}";
+    const ENV_SUPABASE_API_BASE = "{{ENV_SUPABASE_API_BASE}}";
+
+    // Helper to fetch env value safely
+    function getEnv(key, fallback) {
+      switch (key) {
+        case 'ENV_CLIENT_ID': return (ENV_CLIENT_ID && ENV_CLIENT_ID !== '{{ENV_CLIENT_ID}}') ? ENV_CLIENT_ID : (fallback || '');
+        case 'ENV_STRIPE_DASH_URL': return (ENV_STRIPE_DASH_URL && ENV_STRIPE_DASH_URL !== '{{ENV_STRIPE_DASH_URL}}') ? ENV_STRIPE_DASH_URL : (fallback || '');
+        case 'ENV_SUPABASE_API_BASE': return (ENV_SUPABASE_API_BASE && ENV_SUPABASE_API_BASE !== '{{ENV_SUPABASE_API_BASE}}') ? ENV_SUPABASE_API_BASE : (fallback || '');
+        default: return '';
+      }
+    }
+
+    // Simple panel wiring (expand as you wire real routes)
+    const panels = {
+      overview: document.getElementById('overviewPanel'),
+      roles: document.getElementById('rolesPanel'),
+      audit: document.getElementById('auditPanel'),
+      finances: document.getElementById('financesPanel')
+    };
+
+    function showPanel(name) {
+      Object.values(panels).forEach(p => p && (p.style.display = 'none'));
+      if (panels[name]) panels[name].style.display = 'flex';
+    }
+
+    // Open Stripe Dashboard (env-driven)
+    document.getElementById('openStripe')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = getEnv('ENV_STRIPE_DASH_URL', '');
+      if (url) window.open(url, '_blank');
+      else alert('Stripe Dashboard URL not configured');
+    });
+
+    // Example: wire data load (stub)
+    // You will replace with actual fetch calls to your APIs
+    // document.getElementById('load-data')?.addEventListener('click', async () => {
+    //   const base = getEnv('ENV_SUPABASE_API_BASE', '');
+    //   if (!base) { alert('Configure ENV_SUPABASE_API_BASE'); return; }
+    //   // fetch data...
+    // });
+
+    // You can wire other event handlers similarly when endpoints exist
+  </script>
+</body>
+</html>
