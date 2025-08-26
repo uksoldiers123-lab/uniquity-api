@@ -21,7 +21,7 @@
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
 
-/* Top nav */
+/* Top nav (shared look with client) */
 .nav {
   position: sticky; top: 0; z-index: 1100;
   background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
@@ -67,11 +67,15 @@ th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
 .section { margin-bottom: 14px; }
 .input, select { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
 
-/* small helpers for layout tweaks on mobile */
+/* Layout helpers for mobile */
 .row { display: flex; gap: 8px; align-items: center; }
-  </style>
+
+/* Typography parity with client-dashboard.html */
+h1, h2 { font-weight: 700; }
+</style>
 </head>
 <body>
+  <!-- Shared header (client dashboard visually mirrors this) -->
   <nav class="nav" aria-label="Main">
     <div class="nav-inner container">
       <div class="brand" aria-label="Brand">
@@ -85,34 +89,35 @@ th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
     </div>
   </nav>
 
-  <!-- Layout: Sidebar + Main -->
+  <!-- Layout: Sidebar + Main, mirroring clientDash -->
   <div class="container layout" id="layout"
        data-client-id="{{ENV_CLIENT_ID}}"
        data-env-stripe-url="{{ENV_STRIPE_DASH_URL}}"
        data-env-api-base="{{ENV_SUPABASE_API_BASE}}">
-    <!-- Sidebar -->
-    <aside aria-label="Sidebar navigation">
+
+    <!-- Admin Sidebar (mirror look/feel of client dashboard navigation) -->
+    <aside class="sidebar" aria-label="Admin Navigation">
       <div class="section-title">Overview</div>
       <div class="card" style="margin-bottom:12px;">
-        This panel shows admin data: RBAC, audit, and Stripe-derived finances.
+        Admin data: RBAC, audit, Stripe-derived finances, per-tenant metrics.
       </div>
       <div class="section-title" style="margin-top:8px;">Navigation</div>
-      <ul style="list-style:none; padding:0; margin:0;">
-        <li><a href="#/overview">Overview</a></li>
-        <li><a href="#/roles">Roles & Permissions</a></li>
-        <li><a href="#/audit">Audit Logs</a></li>
-        <li><a href="#/finances">Finances</a></li>
-      </ul>
+      <nav class="nav" aria-label="Admin Nav" style="display:block;">
+        <a href="#/overview" class="active" id="nav-overview">Overview</a>
+        <a href="#/roles" id="nav-roles">Roles & Permissions</a>
+        <a href="#/audit" id="nav-audit">Audit Logs</a>
+        <a href="#/finances" id="nav-finances">Finances</a>
+      </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main aria-label="Main dashboard content">
-      <!-- Overview -->
+    <!-- Admin Main Content -->
+    <main aria-label="Admin dashboard content">
+      <!-- Overview Panel -->
       <section class="hero panel" id="overviewPanel" style="display:flex; flex-direction:column;">
         <div class="section-title" style="margin-bottom:6px;">Overview</div>
         <h1>Admin Dashboard</h1>
         <p class="lead" style="color:#64748b;">
-          RBAC, Audit, and Stripe-derived metrics across tenants. All data sourced from Supabase with Stripe integration.
+          RBAC, Audit, and Stripe-derived metrics across tenants. Data sourced from Supabase with Stripe integration.
         </p>
 
         <div class="grid" style="grid-template-columns:1fr 1fr;">
@@ -135,7 +140,7 @@ th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
           <button class="btn" id="btn-create-role">Create Role</button>
           <span class="chip" id="permission-count">Permissions: 0</span>
         </div>
-        <table id="roles-table">
+        <table id="roles-table" aria-label="Roles table">
           <thead><tr><th>Role</th><th>Description</th><th>Permissions</th><th>Actions</th></tr></thead>
           <tbody></tbody>
         </table>
@@ -159,7 +164,7 @@ th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
           <button class="btn" id="audit-search">Search</button>
           <button class="btn secondary" id="audit-export">Export</button>
         </div>
-        <table id="audit-table" style="margin-top:8px;">
+        <table id="audit-table" aria-label="Audit table" style="margin-top:8px;">
           <thead><tr><th>Timestamp</th><th>Tenant</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
           <tbody></tbody>
         </table>
@@ -171,7 +176,7 @@ th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
         <div class="grid" style="grid-template-columns: 1fr 1fr;">
           <div class="card">
             <div class="section-title" style="margin-bottom:6px;">Today by Tenant</div>
-            <table id="tenants-today">
+            <table id="tenants-today" aria-label="Tenants today">
               <thead><tr><th>Tenant</th><th>Gross</th><th>Net</th><th>Fees</th></tr></thead>
               <tbody></tbody>
             </table>
@@ -188,3 +193,88 @@ th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
   </div>
 
   <script>
+    // Env placeholders (swap with real env vars at build/deploy)
+    const ENV_CLIENT_ID = "{{ENV_CLIENT_ID}}";
+    const ENV_STRIPE_DASH_URL = "{{ENV_STRIPE_DASH_URL}}";
+    const ENV_SUPABASE_API_BASE = "{{ENV_SUPABASE_API_BASE}}";
+
+    // Simple helper to fall back if templating didn't replace
+    function getEnv(key, fallback) {
+      switch (key) {
+        case 'ENV_CLIENT_ID': return (ENV_CLIENT_ID && ENV_CLIENT_ID !== '{{ENV_CLIENT_ID}}') ? ENV_CLIENT_ID : (fallback || '');
+        case 'ENV_STRIPE_DASH_URL': return (ENV_STRIPE_DASH_URL && ENV_STRIPE_DASH_URL !== '{{ENV_STRIPE_DASH_URL}}') ? ENV_STRIPE_DASH_URL : (fallback || '');
+        case 'ENV_SUPABASE_API_BASE': return (ENV_SUPABASE_API_BASE && ENV_SUPABASE_API_BASE !== '{{ENV_SUPABASE_API_BASE}}') ? ENV_SUPABASE_API_BASE : (fallback || '');
+        default: return '';
+      }
+    }
+
+    // You can also wire a config fetch from /config if you prefer runtime loading.
+
+    // Panel visibility and navigation (mirror client/dashboard)
+    const panels = {
+      overview: document.getElementById('overviewPanel'),
+      roles: document.getElementById('rolesPanel'),
+      audit: document.getElementById('auditPanel'),
+      finances: document.getElementById('financesPanel')
+    };
+    function showPanel(name){
+      Object.values(panels).forEach(p => p.style.display = 'none');
+      if (panels[name]) panels[name].style.display = 'block';
+    }
+    // Default to Overview
+    showPanel('overview');
+
+    // Open Stripe Dashboard button
+    document.getElementById('openStripe').addEventListener('click', function(e){
+      e.preventDefault();
+      const url = getEnv('ENV_STRIPE_DASH_URL', '');
+      if (url) window.open(url, '_blank');
+      else alert('Stripe Dashboard URL not configured');
+    });
+
+    // Admin navigation (simple demo)
+    // You can wire real routing here; for now, anchors switch panels.
+    document.getElementById('nav-overview')?.addEventListener('click', (e) => { e.preventDefault(); showPanel('overview'); });
+    document.getElementById('nav-roles')?.addEventListener('click', (e) => { e.preventDefault(); showPanel('roles'); });
+    document.getElementById('nav-audit')?.addEventListener('click', (e) => { e.preventDefault(); showPanel('audit'); });
+    document.getElementById('nav-finances')?.addEventListener('click', (e) => { e.preventDefault(); showPanel('finances'); });
+
+    // Data wiring: Replace with real Supabase endpoints
+    // Example placeholders:
+    // - GET /api/v1/roles
+    // - POST /api/v1/roles
+    // - GET /api/v1/audit
+    // - GET /api/v1/tenants/finances/today
+    // - GET /api/v1/payments?tenant_id=&date=
+    // - GET /api/v1/payouts?tenant_id=&date=
+    // - POST /api/v1/stripe/payouts/create
+    // Implement these in your backend and call here.
+
+    // Minimal placeholder to avoid console errors if you load this without API wired
+    window.addEventListener('load', () => {
+      // Example for env-driven static totals to illustrate the UI state
+      // You would replace with actual data fetches
+      const totals = document.getElementById('totals-today');
+      if (totals) totals.textContent = '$0.00';
+      const platform = document.getElementById('platform-fees');
+      if (platform) platform.textContent = '$0.00';
+      const tenantTable = document.querySelector('#tenants-today tbody');
+      if (tenantTable) tenantTable.innerHTML = '<tr><td>Tenant A</td><td>$0.00</td><td>$0.00</td><td>$0.00</td></tr>';
+    });
+
+    // Roles UI actions (stub)
+    document.getElementById('btn-create-role')?.addEventListener('click', () => {
+      const name = prompt('Role name');
+      if (!name) return;
+      const desc = prompt('Description:') || '';
+      // POST to /api/v1/roles
+      alert('Role creation is a placeholder. Implement a backend POST to /api/v1/roles.');
+    });
+
+    // Audit export (stub)
+    document.getElementById('audit-export')?.addEventListener('click', () => {
+      alert('Audit export is a placeholder. Implement CSV/JSON export from your audit data.');
+    });
+  </script>
+</body>
+</html>
