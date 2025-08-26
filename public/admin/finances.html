@@ -1,0 +1,48 @@
+--- a/public/admin/finances.html
++++ b/public/admin/finances.html
+@@ -0,0 +1,400 @@
++<!doctype html>
++<html lang="en">
++<head> ... (same CSS variables with mobile-friendly tweaks) ...</head>
++<body>
++  <nav> ... admin header ... </nav>
++  <main class="container">
++    <section class="panel" id="finances-overview">
++      <h2 class="section-title">Today & Interval Finances</h2>
++      <div id="finances-tabs" class="tabs">
++        <button data-interval="hour">Hour</button>
++        <button data-interval="day" class="active">Day</button>
++        <button data-interval="week">Week</button>
++        <button data-interval="month">Month</button>
++        <button data-interval="quarter">Quarter</button>
++        <button data-interval="year">Year</button>
++      </div>
++      <canvas id="financesChart" width="400" height="220"></canvas>
++      <div id="tenants-today" class="scrollable"></div>
++    </section>
++    <section class="panel" id="splits-panel">
++      <h2 class="section-title">Profit Splits (Owner A / Owner B / Treasury)</h2>
++      <form id="splits-form">
++        <label>Owner A %
++          <input type="number" step="0.01" id="ownerA" />
++        </label>
++        <label>Owner B %
++          <input type="number" step="0.01" id="ownerB" />
++        </label>
++        <label>Treasury %
++          <input type="number" step="0.01" id="treasury" />
++        </label>
++        <button type="submit" class="btn">Save Splits</button>
++      </form>
++    </section>
++  </main>
++  <script>
++    // mobile-friendly: ensure large, touch-friendly controls
++    // Fetch and render logic stubs (adapt to your API)
++    document.addEventListener('DOMContentLoaded', () => {
++      // patch: fetch splits, today's totals, etc.
++      // Initialize chart with Chart.js (compat with mobile)
++    });
++  </script>
++</body>
++</html>
