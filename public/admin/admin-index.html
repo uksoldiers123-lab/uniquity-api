@@ -1,176 +1,190 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Uniquity Solutions - Admin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- Admin CSS (unified) -->
-  <link rel="stylesheet" href="admin-styles.css" />
   <style>
-    /* Inline placeholders for safe theming (to be replaced server-side from env) */
-    :root {
-      --brand: {{ BRAND }};        /* e.g., #1f2a44 */
-      --bg: {{ BG }};                /* e.g., #f5f7fa */
-      --text: {{ TEXT }};            /* e.g., #333 */
-      --muted: {{ MUTED }};          /* e.g., #6b7280 */
-      --card-bg: {{ CARD_BG }};      /* e.g., #ffffff */
-      --shadow: {{ SHADOW }};         /* e.g., 0 2px 8px rgba(0,0,0,.08) */
-      --radius: {{ RADIUS }};         /* e.g., 12px */
-    }
+:root {
+  --bg: #96A3B1;           /* grayish blue */
+  --text: #1f2937;         /* slate */
+  --muted: #4b5563;        /* muted text */
+  --card: #ffffff;
+  --primary: #e94b4b;       /* red highlight */
+  --primary-700: #d13f3f;
+  --accent: #fbbf24;        /* yellow highlight */
+  --ring: rgba(0,0,0,.08);
+  --shadow: 0 10px 30px rgba(2,6,23,.15);
+  --radius: 18px;
+  --nav-h: 56px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+/* Top nav */
+.nav {
+  position: sticky; top: 0; z-index: 1100;
+  background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  height: var(--nav-h);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 100%; max-width: 1200px; margin: 0 auto; }
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+.brand-mark { width: 28px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+
+aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; }
+main { display: grid; gap: 16px; align-content: start; }
+
+.panel { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; min-height: 180px; }
+
+.section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
+
+h1, h2 { margin: 0 0 8px; }
+
+.hero { padding: 28px; border-radius: 14px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 6px 20px rgba(0,0,0,.04); }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr; }
+}
+
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+
+.btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn.secondary { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+
+.chip { display:inline-block; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; font-size: 12px; }
+
+.section { margin-bottom: 14px; }
+.input, select { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+
+/* small helpers for layout tweaks on mobile */
+.row { display: flex; gap: 8px; align-items: center; }
   </style>
 </head>
 <body>
-  <header class="brand" role="banner" aria-label="Admin header" style="display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-title" style="font-weight:700; color:#fff;">Admin Dashboard</span>
+  <nav class="nav" aria-label="Main">
+    <div class="nav-inner container">
+      <div class="brand" aria-label="Brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Uniquity Solutions</span>
+      </div>
+      <div class="row" style="gap:12px;">
+        <button class="btn" id="openStripe">Open Stripe Dashboard</button>
+        <button class="btn secondary" id="toggleAdminView">Admin View</button>
+      </div>
     </div>
-    <div style="display:flex; gap:8px;">
-      <button class="btn secondary" id="openStripe">Open Stripe Dashboard</button>
-      <button class="btn secondary" id="logoutBtn" style="display:none;">Logout</button>
-    </div>
-  </header>
+  </nav>
 
-  <div class="app" role="main">
+  <!-- Layout: Sidebar + Main -->
+  <div class="container layout" id="layout"
+       data-client-id="{{ENV_CLIENT_ID}}"
+       data-env-stripe-url="{{ENV_STRIPE_DASH_URL}}"
+       data-env-api-base="{{ENV_SUPABASE_API_BASE}}">
     <!-- Sidebar -->
-    <aside class="sidebar" aria-label="Admin navigation">
-      <div class="section-title">Navigation</div>
-      <nav class="nav" id="admin-nav">
-        <a href="#overview" class="active">Overview</a>
-        <a href="#metrics">Metrics</a>
-        <a href="#roles">Roles</a>
-        <a href="#payouts">Payouts</a>
-        <a href="#settings">Settings</a>
-        <a href="#reports">Reports</a>
-      </nav>
+    <aside aria-label="Sidebar navigation">
+      <div class="section-title">Overview</div>
+      <div class="card" style="margin-bottom:12px;">
+        This panel shows admin data: RBAC, audit, and Stripe-derived finances.
+      </div>
+      <div class="section-title" style="margin-top:8px;">Navigation</div>
+      <ul style="list-style:none; padding:0; margin:0;">
+        <li><a href="#/overview">Overview</a></li>
+        <li><a href="#/roles">Roles & Permissions</a></li>
+        <li><a href="#/audit">Audit Logs</a></li>
+        <li><a href="#/finances">Finances</a></li>
+      </ul>
     </aside>
 
-    <!-- Main content -->
-    <section class="content" aria-label="Admin content area">
-      <!-- Overview with multi-timeframe charts -->
+    <!-- Main Content -->
+    <main aria-label="Main dashboard content">
+      <!-- Overview -->
       <section class="hero panel" id="overviewPanel" style="display:flex; flex-direction:column;">
         <div class="section-title" style="margin-bottom:6px;">Overview</div>
-        <h1 style="margin:0 0 6px;">Over 20 years of admin operations</h1>
-        <p class="text-muted" style="margin:0 0 12px;">
-          A unified admin UI showing funds, admin fees, and payouts across all connected client accounts.
+        <h1>Admin Dashboard</h1>
+        <p class="lead" style="color:#64748b;">
+          Welcome to your Uniquity Solutions Administrator Dashboard.RBAC, Audit, and Stripe-derived metrics across tenants. All data sourced from Supabase with Stripe integration.
         </p>
 
-        <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap:16px;">
-          <div class="card" aria-label="Funds by time">
-            <div class="section-title" style="margin-bottom:6px;">Funds by Time</div>
-            <canvas id="fundsChart" height="180"></canvas>
-            <div class="chart-legend text-muted" style="margin-top:6px;">
-              <span>Time buckets: Hour, Day, Week, Month, Quarter, Year, All Time</span>
-            </div>
+        <div class="grid" style="grid-template-columns:1fr 1fr;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Today’s Totals (Company)</div>
+            <div id="totals-today" style="font-size:22px; font-weight:700;">$0.00</div>
+            <div class="chip" id="totals-today-chip" style="margin-top:6px;">Live</div>
           </div>
-          <div class="card" aria-label="Admin fees by time">
-            <div class="section-title" style="margin-bottom:6px;">Admin Fees by Time</div>
-            <canvas id="feesChart" height="180"></canvas>
-          </div>
-        </div>
-
-        <div class="grid" style="grid-template-columns: repeat(2, 1fr); margin-top:12px;">
-          <div class="card" aria-label="All accounts revenue">
-            <div class="section-title" style="margin-bottom:6px;">All Accounts Revenue</div>
-            <div id="allAccountsRevenue" style="font-size:22px; font-weight:700;">$0.00</div>
-            <div class="text-muted" id="allAccountsCaption" style="margin-top:6px;">Total revenue across all client accounts</div>
-          </div>
-          <div class="card" aria-label="Time range controls">
-            <div class="section-title" style="margin-bottom:6px;">Time Range</div>
-            <div id="time-range-buttons" style="display:flex; flex-wrap:wrap; gap:8px;">
-              <button class="btn secondary" data-range="hour">Hour</button>
-              <button class="btn secondary" data-range="day">Day</button>
-              <button class="btn secondary" data-range="week">Week</button>
-              <button class="btn secondary" data-range="month">Month</button>
-              <button class="btn secondary" data-range="quarter">Quarter</button>
-              <button class="btn secondary" data-range="year">Year</button>
-              <button class="btn secondary" data-range="all">All Time</button>
-            </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Platform Fees Today</div>
+            <div id="platform-fees" style="font-size:22px; font-weight:700;">$0.00</div>
           </div>
         </div>
       </section>
 
-      <!-- Roles & permissions -->
-      <section class="panel" id="roles" aria-label="Roles management" style="margin-top:16px;">
+      <!-- Roles & Permissions -->
+      <section class="panel" id="rolesPanel" style="display:none;">
         <div class="section-title">Roles & Permissions</div>
-        <div class="grid" style="grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="card" aria-label="Assign role">
-            <div class="section-title" style="margin-bottom:6px;">Assign Roles</div>
-            <form id="role-form" onsubmit="return false;">
-              <div class="field" style="margin-bottom:8px;">
-                <label for="employee-email">Employee Email</label>
-                <input id="employee-email" type="email" placeholder="employee@example.com" required />
-              </div>
-              <div class="field" style="margin-bottom:8px;">
-                <label for="role-select">Role</label>
-                <select id="role-select" required>
-                  <option value="admin">Admin</option>
-                  <option value="manager">Manager</option>
-                  <option value="viewer">Viewer</option>
-                </select>
-              </div>
-              <button class="btn" id="assignRoleBtn">Assign Role</button>
-            </form>
-            <div id="role-status" class="text-muted" style="margin-top:6px;"></div>
-          </div>
+        <div class="row" style="flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          <button class="btn" id="btn-create-role">Create Role</button>
+          <span class="chip" id="permission-count">Permissions: 0</span>
+        </div>
+        <table id="roles-table">
+          <thead><tr><th>Role</th><th>Description</th><th>Permissions</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
 
-          <div class="card" aria-label="Roles overview">
-            <div class="section-title" style="margin-bottom:6px;">Roles Quick Overview</div>
-            <ul id="roles-list" style="margin:0; padding-left:16px;">
-              <li>Admin: full access</li>
-              <li>Manager: restricted write access</li>
-              <li>Viewer: read-only</li>
-            </ul>
+      <!-- Audit Logs -->
+      <section class="panel" id="auditPanel" style="display:none;">
+        <div class="section-title">Audit Logs</div>
+        <div class="filters" style="display:flex; flex-wrap: wrap; gap:8px; align-items:center;">
+          <input id="audit-tenant" placeholder="Tenant" class="input" />
+          <input id="audit-user" placeholder="User" class="input" />
+          <input id="audit-from" type="date" class="input" />
+          <input id="audit-to" type="date" class="input" />
+          <select id="audit-action" class="input">
+            <option value="">Any Action</option>
+            <option>create_payout</option>
+            <option>update_role</option>
+            <option>view_dashboard</option>
+            <option>record_payment</option>
+          </select>
+          <button class="btn" id="audit-search">Search</button>
+          <button class="btn secondary" id="audit-export">Export</button>
+        </div>
+        <table id="audit-table" style="margin-top:8px;">
+          <thead><tr><th>Timestamp</th><th>Tenant</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Finances -->
+      <section class="panel" id="financesPanel" style="display:none;">
+        <div class="section-title">Finances (Today)</div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Today by Tenant</div>
+            <table id="tenants-today">
+              <thead><tr><th>Tenant</th><th>Gross</th><th>Net</th><th>Fees</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Totals</div>
+            <div id="totals-today" style="font-size:22px; font-weight:700;">$0.00</div>
+            <div style="margin-top:8px;">Stripe Fees Today: <span id="stripes-fees">$0.00</span></div>
+            <div style="margin-top:4px;">Platform Fees Today: <span id="platform-fees-today">$0.00</span></div>
           </div>
         </div>
       </section>
-
-      <!-- Payout configuration -->
-      <section class="panel" id="payouts" aria-label="Payout configuration" style="margin-top:16px;">
-        <div class="section-title">Payout Configuration</div>
-        <div class="grid" style="grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="card" style="min-height: 120px;">
-            <div class="section-title" style="margin-bottom:6px;">Owner Percentage</div>
-            <input id="owner-percent" type="number" min="0" max="100" step="0.1" value="70" style="width:100%; padding:8px;" />
-            <div class="text-muted" style="margin-top:6px;">Share of gross after Stripe fees</div>
-          </div>
-          <div class="card" style="min-height: 120px;">
-            <div class="section-title" style="margin-bottom:6px;">Treasury Percentage</div>
-            <input id="treasury-percent" type="number" min="0" max="100" step="0.1" value="5" style="width:100%; padding:8px;" />
-            <div class="text-muted" style="margin-top:6px;">Reserve/treasury allocation</div>
-          </div>
-        </div>
-        <div style="margin-top:12px;">
-          <button class="btn" id="savePayoutConfigBtn">Save Payout Config</button>
-          <span id="payoutConfigStatus" class="text-muted" style="margin-left:8px;"></span>
-        </div>
-      </section>
-
-      <!-- All-time metrics panel -->
-      <section class="panel" id="accounts-all" aria-label="All accounts metrics" style="margin-top:16px;">
-        <div class="section-title">All Accounts - Revenue by Time</div>
-        <div class="chart" id="allTimeChart" style="height:240px; display:flex; align-items:center; justify-content:center;">
-          All-time revenue chart placeholder
-        </div>
-      </section>
-
-      <!-- Data sync/export -->
-      <section class="panel" id="data-sync" aria-label="Data sync" style="margin-top:16px;">
-        <div class="section-title">Data & Sync</div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button class="btn" id="syncBtn">Sync Data</button>
-          <button class="btn secondary" id="exportBtn">Export CSV</button>
-        </div>
-        <div class="text-muted" style="margin-top:6px;">Pull latest data from Stripe and Supabase; update charts</div>
-      </section>
-    </section>
+    </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="admin-dashboard.js"></script>
-</body>
-</html>
-
+  <script>
