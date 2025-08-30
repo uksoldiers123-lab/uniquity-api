@@ -1,0 +1,33 @@
+<!-- Inside create-account.html, after the form -->
+<script>
+async function handleCreateAccount(e) {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById('name').value,
+    company: document.getElementById('company').value,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value
+  };
+
+  try {
+    const res = await fetch('/api/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (res.ok && result.onboardingUrl) {
+      window.location.href = result.onboardingUrl;
+    } else if (res.ok) {
+      // fallback
+      window.location.href = 'login.html';
+    } else {
+      alert(result.message || 'Failed to create account');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Network error. Try again.');
+  }
+}
+      </script>
