@@ -1,0 +1,87 @@
+<title>Uniquity Solutions — Sign In</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navbar / Header -->
+  <nav class="nav" aria-label="Primary">
+    <div class="container nav-inner">
+      <a class="brand" href="login.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Uniquity Solutions
+      </a>
+      <div class="nav-links">
+        <a href="login.html" class="cta">Sign In</a>
+        <a href="create-account.html" class="cta ghost">Create Account</a>
+      </div>
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile overlay menu (hidden by default; controlled via main.js) -->
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation" hidden>
+    <a href="login.html" class="cta">Sign In</a>
+    <a href="create-account.html" class="ghost">Create Account</a>
+  </div>
+
+  <!-- Page Content -->
+  <main class="container" role="main" aria-label="Sign In">
+    <section class="card" style="margin-top:48px;">
+      <header class="card-header" style="padding:22px 22px 0 22px;">
+        <h1 class="card-title" style="font-size:32px; margin:0;">Sign In</h1>
+        <p class="card-subtitle" style="margin:6px 0 0; color:#6b7280;">Sign in to access your dashboard</p>
+      </header>
+
+      <div class="card-body" style="padding:18px;">
+        <form id="login-form" autocomplete="on" action="#" method="post">
+          <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group" style="margin-bottom:12px;">
+              <label for="login-email" style="display:block; margin-bottom:6px;">Email</label>
+              <input id="login-email" name="email" type="email" required
+                     placeholder="you@domain.com"
+                     style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:6px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+              <label for="login-password" style="display:block; margin-bottom:6px;">Password</label>
+              <input id="login-password" name="password" type="password" required
+                     placeholder="Your password"
+                     style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:6px;">
+            </div>
+          </div>
+
+          <button type="submit" style="margin-top:8px; padding:12px 16px; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer;">
+            Sign In
+          </button>
+        </form>
+
+        <p style="color:#6b7280; margin-top:14px;">
+          New here? <a href="create-account.html" style="color:#1f6feb; text-decoration:underline;">Create an Account</a>
+        </p>
+
+        <p style="color:#6b7280; margin-top:8px;">
+          Don’t have an account? <a href="create-account.html" style="color:#1f6feb; text-decoration:underline;">Sign Up</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" aria-label="Footer" style="margin-top:40px;">
+    <div class="container">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Uniquity Solutions
+      </div>
+      <small>© 2004–2025 Uniquity Solutions. All rights reserved.</small>
+    </div>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
