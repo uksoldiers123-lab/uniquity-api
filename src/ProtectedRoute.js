@@ -1,6 +1,7 @@
+
 import { Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from './utils/supabaseClient';
 
 export function ProtectedRoute({ children }) {
   const location = useLocation();
@@ -15,6 +16,6 @@ export function ProtectedRoute({ children }) {
     })();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Loading auth…</div>;
   return user ? children : <Navigate to="/login" state={{ from: location }} />;
 }
