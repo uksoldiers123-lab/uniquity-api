@@ -1,4 +1,4 @@
-File: 20250101_create_payments.sql
+
 -- Payments records
 CREATE TABLE IF NOT EXISTS payments (
   id SERIAL PRIMARY KEY,
