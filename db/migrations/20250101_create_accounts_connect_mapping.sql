@@ -1,4 +1,4 @@
-File: 20250101_create_accounts_connect_mapping.sql
+
 -- Mapping between environment, clientCode and Stripe Connect account
 CREATE TABLE IF NOT EXISTS accounts_connect_mapping (
   id SERIAL PRIMARY KEY,
