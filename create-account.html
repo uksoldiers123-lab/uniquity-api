@@ -31,3 +31,52 @@ async function handleCreateAccount(e) {
   }
 }
       </script>
+<form id="user-create-form" autocomplete="off" onsubmit 
+  ="return handleCreateAccount(event);">
+  
+  <input id="name" name="name" type="text" placeholder="Full Name" required />
+  <input id="company" name="company" type="text" placeholder="Company Name" required />
+  <input id="phone" name="phone" type="tel" placeholder="+1 (555) 123-4567" required />
+  <input id="email" name="email" type="email" placeholder="you@domain.com" required />
+  <input id="password" name="password" type="password" placeholder="Password" required />
+  <select id="accountType" name="accountType" required>
+    <option value="basic">Basic</option>
+    <option value="employee">Employee</option>
+  </select>
+  <button type="submit">Create Account</button>
+</form>
+
+<script>
+async function handleCreateAccount(e) {
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById('name').value,
+    company: document.getElementById('company').value,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value,
+    accountType: document.getElementById('accountType').value
+  };
+
+  try {
+    const res = await fetch('/api/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      if (data.onboardingUrl) {
+        window.location.href = data.onboardingUrl;
+      } else {
+        window.location.href = '/login.html';
+      }
+    } else {
+      alert(data.message || 'Failed to create account');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Network error. Try again.');
+  }
+}
+</script>
