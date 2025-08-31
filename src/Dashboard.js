@@ -1,37 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import AdminDashboard from './components/AdminDashboard';
-import ClientDashboard from './components/ClientDashboard';
 
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_KEY
-);
+import { useEffect, useState } from 'react';
+import { supabase } from '../utils/supabaseClient';
 
-function Dashboard() {
+export default function Dashboard() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    async function fetchUser() {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) console.error(error);
-      else setUser(data.user);
+    async function load() {
+      const { data } = await supabase.auth.getUser();
+      setUser(data?.user || null);
     }
-
-    fetchUser();
+    load();
   }, []);
 
-  if (!user) return <div>Loading...</div>;
+  async function signOut() {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  }
 
   return (
-    <div>
-      {user.role === 'admin' ? (
-        <AdminDashboard />
+    <div style={{ padding: '2rem' }}>
+      <h1>Dashboard</h1>
+      {user ? (
+        <div>
+          <p>Welcome, {user.email}</p>
+          <button onClick={signOut}>Sign out</button>
+        </div>
       ) : (
-        <ClientDashboard />
+        <p>Loading user...</p>
       )}
     </div>
   );
 }
-
-export default Dashboard;
