@@ -1,4 +1,4 @@
-File: 20250101_create_users_roles.sql
+
 -- Basic users and roles
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
