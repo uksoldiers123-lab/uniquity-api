@@ -1,4 +1,4 @@
-File: 20250101_create_merchants_clients.sql
+
 -- Create merchants/clients table
 CREATE TABLE IF NOT EXISTS merchants_clients (
   id SERIAL PRIMARY KEY,
