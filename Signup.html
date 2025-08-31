@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Signup - Uniquity Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Minimal styles to resemble your app */
+    body { font-family: Inter, system-ui, sans-serif; background: #f8fafc; color: #111; padding: 40px; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; max-width: 420px; margin: 0 auto; }
+    input { width: 100%; padding: 10px; margin-top: 6px; }
+    button { padding: 10px 12px; background: #e94b4b; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <label>Email
+        <input type="email" id="email" required />
+      </label>
+      <label>Password
+        <input type="password" id="password" required />
+      </label>
+      <button type="submit">Sign Up</button>
+    </form>
+    <hr/>
+    <button id="githubSignup" style="margin-top:8px;">Sign Up with GitHub (admin)</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    // TODO: replace with your env vars or fetch from a secure endpoint
+    const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
+    const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY;
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const form = document.getElementById('signupForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { user, error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        alert(error.message);
+      } else {
+        // Redirect to dashboard after signup (or show a note about email verification)
+        window.location.href = '/client-dashboard.html';
+      }
+    });
+    document.getElementById('githubSignup').addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({ provider: 'github' });
+    });
+  </script>
+</body>
+</html>
