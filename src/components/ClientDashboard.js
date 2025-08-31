@@ -1,70 +1,102 @@
 import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
 export default function ClientDashboard() {
   const [user, setUser] = useState(null);
-  const [tenant, setTenant] = useState(null);
+  const [tenantId, setTenantId] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data?.user ?? null);
-      // If you have tenant_id stored in user profile, fetch it here
-      // For demo, attempt to fetch tenant via a join if you have a tenants table
-      // Example (pseudo): const { data: t } = await supabase.from('tenant_users').select('tenant_id').eq('user_id', data.user.id).single();
-      // setTenant(t?.tenant_id);
-      // Then fetch invoices/payments for that tenant
-      if (tenant) {
-        const { data: inv } = await supabase.from('invoices').select('*').eq('tenant_id', tenant);
+      // Get current user
+      const { data: userData } = await supabase.auth.getUser();
+      const u = userData?.user ?? null;
+      setUser(u);
+
+      if (!u) {
+        // redirect to login if not authenticated
+        window.location.href = '/login';
+        return;
+      }
+
+      // Get tenant_id for this user from tenant_users
+      const { data: tu } = await supabase
+        .from('tenant_users')
+        .select('tenant_id, role')
+        .eq('user_id', u.id)
+        .maybeSingle();
+
+      const tid = tu?.tenant_id;
+      if (tid) {
+        setTenantId(tid);
+
+        // Fetch invoices and payments for this tenant
+        const { data: inv } = await supabase.from('invoices').select('*').eq('tenant_id', tid);
         setInvoices(inv ?? []);
-        const { data: pay } = await supabase.from('payments').select('*').eq('tenant_id', tenant);
+
+        const { data: pay } = await supabase.from('payments').select('*').eq('tenant_id', tid);
         setPayments(pay ?? []);
       }
+
+      setLoading(false);
     })();
-  }, [tenant]);
+  }, []);
+
+  if (loading) return <div>Loading dashboard...</div>;
 
   return (
-    <div>
-      <h2>Client Dashboard</h2>
-      {user ? <p>Welcome, {user.email}</p> : <p>Loading client...</p>}
+    <div style={{ padding: '2rem' }}>
+      <header className="hero" style={{ marginBottom: 20 }}>
+        <h1>Client Dashboard</h1>
+        {user ? <p>Welcome, {user.email}</p> : null}
+      </header>
 
-      <section>
-        <h3>Invoices</h3>
-        <table>
-          <thead><tr><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Due</th></tr></thead>
-          <tbody>
-            {invoices.map((i) => (
-              <tr key={i.id}>
-                <td>{i.stripe_invoice_id}</td>
-                <td>{i.amount}</td>
-                <td>{i.currency}</td>
-                <td>{i.status}</td>
-                <td>{i.due_date}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      {tenantId ? (
+        <div className="grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <section className="panel card">
+            <div className="section-title">Invoices</div>
+            <table>
+              <thead><tr><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Due</th></tr></thead>
+              <tbody>
+                {invoices.map((i) => (
+                  <tr key={i.id}>
+                    <td>{i.stripe_invoice_id || '—'}</td>
+                    <td>{i.amount}</td>
+                    <td>{i.currency}</td>
+                    <td>{i.status}</td>
+                    <td>{i.due_date ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
 
-      <section>
-        <h3>Payments</h3>
-        <table>
-          <thead><tr><th>Payment</th><th>Amount</th><th>Currency</th><th>Status</th><th>Paid At</th></tr></thead>
-          <tbody>
-            {payments.map((p) => (
-              <tr key={p.id}>
-                <td>{p.stripe_payment_intent_id}</td>
-                <td>{p.amount}</td>
-                <td>{p.currency}</td>
-                <td>{p.status}</td>
-                <td>{p.paid_at}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+          <section className="panel card">
+            <div className="section-title">Payments</div>
+            <table>
+              <thead><tr><th>Payment</th><th>Amount</th><th>Currency</th><th>Status</th><th>Paid At</th></tr></thead>
+              <tbody>
+                {payments.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.stripe_payment_intent_id || '—'}</td>
+                    <td>{p.amount}</td>
+                    <td>{p.currency}</td>
+                    <td>{p.status}</td>
+                    <td>{p.paid_at ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        </div>
+      ) : (
+        <div className="panel card">
+          <p>No tenant association found for your user. Contact admin to link your account.</p>
+        </div>
+      )}
     </div>
   );
 }
