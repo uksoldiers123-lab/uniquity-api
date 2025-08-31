@@ -23,6 +23,7 @@ export default function Login() {
   }
 
   async function handleGitHubSignIn() {
+    // Admins only; tenant sign-in uses email/password
     await supabase.auth.signInWithOAuth({ provider: 'github' });
   }
 
@@ -44,8 +45,8 @@ export default function Login() {
 
       <hr style={{ margin: '1.5rem 0' }} />
 
-      <button onClick={handleGitHubSignIn} aria-label="Sign in with GitHub">
-        Sign in with GitHub
+      <button onClick={handleGitHubSignIn} aria-label="Sign in with GitHub" style={{ display: 'block' }}>
+        Sign in with GitHub (admin)
       </button>
     </div>
   );
