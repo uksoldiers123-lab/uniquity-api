@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
@@ -11,36 +10,31 @@ export default function ClientDashboard() {
 
   useEffect(() => {
     (async () => {
-      // Get current user
-      const { data: userData } = await supabase.auth.getUser();
-      const u = userData?.user ?? null;
-      setUser(u);
-
-      if (!u) {
-        // redirect to login if not authenticated
+      const { data: u } = await supabase.auth.getUser();
+      const current = u?.user ?? null;
+      setUser(current);
+      if (!current) {
         window.location.href = '/login';
         return;
       }
 
-      // Get tenant_id for this user from tenant_users
+      // Resolve tenant via tenant_users
       const { data: tu } = await supabase
         .from('tenant_users')
         .select('tenant_id, role')
-        .eq('user_id', u.id)
+        .eq('user_id', current.id)
         .maybeSingle();
 
       const tid = tu?.tenant_id;
-      if (tid) {
-        setTenantId(tid);
+      setTenantId(tid);
 
-        // Fetch invoices and payments for this tenant
+      if (tid) {
         const { data: inv } = await supabase.from('invoices').select('*').eq('tenant_id', tid);
         setInvoices(inv ?? []);
 
         const { data: pay } = await supabase.from('payments').select('*').eq('tenant_id', tid);
         setPayments(pay ?? []);
       }
-
       setLoading(false);
     })();
   }, []);
@@ -52,6 +46,7 @@ export default function ClientDashboard() {
       <header className="hero" style={{ marginBottom: 20 }}>
         <h1>Client Dashboard</h1>
         {user ? <p>Welcome, {user.email}</p> : null}
+        <p>Your tenant data is scoped to your account.</p>
       </header>
 
       {tenantId ? (
@@ -67,7 +62,7 @@ export default function ClientDashboard() {
                     <td>{i.amount}</td>
                     <td>{i.currency}</td>
                     <td>{i.status}</td>
-                    <td>{i.due_date ?? '—'}</td>
+                    <td>{i.due_date || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -94,7 +89,7 @@ export default function ClientDashboard() {
         </div>
       ) : (
         <div className="panel card">
-          <p>No tenant association found for your user. Contact admin to link your account.</p>
+          <p>No tenant association found for this user.</p>
         </div>
       )}
     </div>
