@@ -8,7 +8,7 @@
       const url = new URL(window.location.href);
       const token = url.searchParams.get('token');
       if (!token) {
-        window.location.href = 'https://dashboard.uniquitysolutions.com/login';
+        window.location.href = 'https://uksoldiers123-lab.github.io/uniquity-api/index.html?';
         return;
       }
 
@@ -21,12 +21,12 @@
 
         if (res.ok) {
           // Redirect to your per-user landing page (adjust as needed)
-          window.location.href = 'https://dashboard.uniquitysolutions.com/';
+          window.location.href = 'https://uksoldiers123-lab.github.io/uniquity-api/index.html';
         } else {
-          window.location.href = 'https://dashboard.uniquitysolutions.com/login';
+          window.location.href = 'https://uksoldiers123-lab.github.io/uniquity-api/index.html?';
         }
       } catch {
-        window.location.href = 'https://dashboard.uniquitysolutions.com/login';
+        window.location.href = 'https://uksoldiers123-lab.github.io/uniquity-api/index.html?';
       }
     })();
   </script>
