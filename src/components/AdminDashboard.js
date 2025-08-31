@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 
 export default function AdminDashboard() {
@@ -9,9 +10,9 @@ export default function AdminDashboard() {
     (async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data?.user ?? null);
-      // Optional: fetch tenants overview for admin
-      // const { data: t } = await supabase.from('tenants').select('*');
-      // setTenants(t ?? []);
+      // Optional: fetch tenants (for admin overview)
+      const { data: t } = await supabase.from('tenants').select('*');
+      setTenants(t ?? []);
     })();
   }, []);
 
@@ -20,11 +21,18 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div>
+    <div style={{ padding: '2rem' }}>
       <h2>Admin Dashboard</h2>
-      {user ? <p>Welcome, {user.email}</p> : <p>Loading admin...</p>}
+      {user ? <p>Welcome, {user.email}</p> : <p>Loading...</p>}
+
       <button onClick={signOut}>Sign Out</button>
-      {/* Admin tenant overview could render below when you wire it up */}
+
+      <h3 style={{ marginTop: 20 }}>Tenants</h3>
+      <ul>
+        {tenants.map((t) => (
+          <li key={t.id}>{t.name} - {t.business_id || '—'}</li>
+        ))}
+      </ul>
     </div>
   );
 }
