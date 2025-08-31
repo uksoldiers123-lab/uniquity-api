@@ -13,7 +13,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { user, session, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -29,14 +29,11 @@ export default function Login() {
   return (
     <div style={{ maxWidth: 420, margin: '0 auto', padding: '2rem' }}>
       <h1>Sign In</h1>
-
       <form onSubmit={handleEmailSignIn} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <label>
-          Email
+        <label>Email
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
-        <label>
-          Password
+        <label>Password
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </label>
         <button type="submit" disabled={loading}>
@@ -50,10 +47,6 @@ export default function Login() {
       <button onClick={handleGitHubSignIn} aria-label="Sign in with GitHub">
         Sign in with GitHub
       </button>
-
-      <p style={{ marginTop: '1rem' }}>
-        Don’t have an account? <a href="/signup">Sign up</a>
-      </p>
     </div>
   );
 }
