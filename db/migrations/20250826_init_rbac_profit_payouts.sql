@@ -1,5 +1,4 @@
---- a/migrations/20250826_init_rbac_profit_payouts.sql
-+++ b/migrations/20250826_init_rbac_profit_payouts.sql
+
 @@ -1,6 +1,120 @@
 +-- RBAC basics
 +CREATE TABLE IF NOT EXISTS roles (
