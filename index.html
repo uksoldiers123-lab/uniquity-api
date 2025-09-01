@@ -1,4 +1,5 @@
-<!doctype >
+<!doctype>
+
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -26,7 +27,7 @@
 
   <main class="container">
     <!-- Signup Section -->
-    <section class="signup-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e7e7eb; border-radius: 8px;">
+    <section class="signup-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
       <h1 style="text-align:center;">Create Account</h1>
       <form id="signupForm" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
         <div>
@@ -72,7 +73,7 @@
     </section>
 
     <!-- Login Section -->
-    <section class="login-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e7e7eb; border-radius: 8px;">
+    <section class="login-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
       <h1 style="text-align:center;">Login</h1>
       <form id="loginForm" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
         <div>
@@ -124,7 +125,20 @@
         document.getElementById('signup-status').innerText = error.message;
       } else {
         document.getElementById('signup-status').innerText = 'Account created! Check your email for verification.';
-        window.location.href = '/dashboard.html'; // Redirect to dashboard after successful signup
+
+        // Call API to create dashboard login link
+        const response = await fetch('/api/create-dashboard-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, email: user.email })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          window.location.href = data.dashboardUrl; // Redirect to the dashboard
+        } else {
+          alert(data.error); // Show error message
+        }
       }
     });
 
@@ -145,7 +159,20 @@
         document.getElementById('login-status').innerText = error.message;
       } else {
         document.getElementById('login-status').innerText = 'Login successful!';
-        window.location.href = '/dashboard.html'; // Redirect to dashboard after successful login
+
+        // Call API to create dashboard login link
+        const response = await fetch('/api/create-dashboard-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, email: user.email })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          window.location.href = data.dashboardUrl; // Redirect to the dashboard
+        } else {
+          alert(data.error); // Show error message
+        }
       }
     });
 
@@ -168,3 +195,4 @@
 
 </body>
 </html>
+
