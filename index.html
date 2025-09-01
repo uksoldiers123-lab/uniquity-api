@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="env.js"></script>
+  <script src="env.js"></script> <!-- Ensure this file sets SUPABASE_URL and SUPABASE_ANON_KEY -->
 </head>
 <body>
   <!-- Navbar -->
@@ -153,9 +153,6 @@
       const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
       if (error) {
         document.getElementById('signup-status').innerText = error.message;
-      } else {
-        // Redirect or handle as needed (GitHub will handle the redirect)
-        window.location.href = '/dashboard.html'; // Adjust as necessary
       }
     });
 
