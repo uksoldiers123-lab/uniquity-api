@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="env.js"></script>
+  <script src="env.js"></script> <!-- Ensure this file sets SUPABASE_URL and SUPABASE_ANON_KEY -->
 </head>
 <body>
   <!-- Navbar -->
@@ -120,10 +120,7 @@
         document.getElementById('signup-status').innerText = error.message;
       } else {
         document.getElementById('signup-status').innerText = 'Account created! Check your email for verification.';
-
-        // Redirect based on role (if applicable)
-        // Here you might want to fetch the user role if you have a user roles table
-        window.location.href = '/dashboard.html'; // Adjust as necessary
+        window.location.href = '/dashboard.html'; // Redirect to dashboard after successful signup
       }
     });
 
@@ -143,10 +140,7 @@
         document.getElementById('login-status').innerText = error.message;
       } else {
         document.getElementById('login-status').innerText = 'Login successful!';
-        
-        // Redirect based on role (if applicable)
-        // Here you might want to fetch the user role if you have a user roles table
-        window.location.href = '/dashboard.html'; // Adjust as necessary
+        window.location.href = '/dashboard.html'; // Redirect to dashboard after successful login
       }
     });
 
@@ -155,6 +149,9 @@
       const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
       if (error) {
         document.getElementById('signup-status').innerText = error.message;
+      } else {
+        // Redirect to a suitable page or handle as needed
+        window.location.href = '/dashboard.html'; // Adjust as necessary
       }
     });
 
