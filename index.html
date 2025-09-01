@@ -25,8 +25,8 @@
 
   <main class="container">
     <section class="signup-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-      <h1 style="text-align:center;">Create Account / Sign In</h1>
-      <form id="authForm" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
+      <h1 style="text-align:center;">Create Account</h1>
+      <form id="signupForm" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
         <div>
           <label>Full Name
             <input type="text" id="fullName" placeholder="Jane Doe" required />
@@ -68,6 +68,34 @@
         After sign-up, you’ll be redirected to your dashboard based on your role.
       </p>
     </section>
+
+    <section class="login-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+      <h1 style="text-align:center;">Login</h1>
+      <form id="loginForm" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
+        <div>
+          <label>Email
+            <input type="email" id="loginEmail" placeholder="you@example.com" required />
+          </label>
+        </div>
+        <div>
+          <label>Password
+            <input type="password" id="loginPassword" placeholder="Enter your password" required />
+          </label>
+        </div>
+
+        <div style="text-align:center;">
+          <button type="submit" id="login-btn" style="padding: .75rem 1.25rem; font-size: 1rem; background-color: #FF6FF00; color: white; border: none; border-radius: 4px;">
+            Login
+          </button>
+        </div>
+
+        <div id="login-status" aria-live="polite" style="color: #d00;"></div>
+      </form>
+
+      <p style="text-align:center; margin-top:.75rem; color:#666;">
+        Don't have an account? <a href="#" id="showSignup">Create one</a>
+      </p>
+    </section>
   </main>
 
   <script>
@@ -76,7 +104,7 @@
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Signup form handler
-    document.getElementById('authForm').addEventListener('submit', async (e) => {
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const name = document.getElementById('fullName').value;
@@ -93,17 +121,35 @@
         document.getElementById('signup-status').innerText = error.message;
       } else {
         document.getElementById('signup-status').innerText = 'Account created! Check your email for verification.';
-        // Redirect to onboarding or dashboard
         window.location.href = '/dashboard.html'; // Adjust as necessary
       }
     });
 
-    // GitHub sign-up handler
-    document.getElementById('github-signup').addEventListener('click', async () => {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const { user, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
       if (error) {
-        document.getElementById('signup-status').innerText = error.message;
+        document.getElementById('login-status').innerText = error.message;
+      } else {
+        document.getElementById('login-status').innerText = 'Login successful!';
+        window.location.href = '/dashboard.html'; // Adjust as necessary
       }
+    });
+
+    // Optional: Toggle between login and signup
+    document.getElementById('showSignup').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelector('.login-section').style.display = 'none';
+      document.querySelector('.signup-section').style.display = 'block';
     });
   </script>
 
