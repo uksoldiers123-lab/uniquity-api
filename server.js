@@ -41,7 +41,7 @@ app.use('/public/client-dashboard', clientDashboardRouter);
 
 // Stripe webhooks
 const webhookRouter = createStripeWebhookRouter(stripe);
-app.use('api/routes/webhooks/stripe', webhookRouter);
+app.use('/api/routes/webhooks/stripe', webhookRouter); // Corrected path
 
 // Starting the server
 console.log('Starting server...');
@@ -50,4 +50,3 @@ app.listen(port, () => {
 });
 
 module.exports = app;
-
