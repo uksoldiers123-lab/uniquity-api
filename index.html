@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="env.js"></script> <!-- Ensure this file sets SUPABASE_URL and SUPABASE_ANON_KEY -->
+  <script src="env.js"></script>
 </head>
 <body>
   <!-- Navbar -->
@@ -100,11 +100,13 @@
   </main>
 
   <script>
+    // Initialize Supabase client
     const supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
     // Signup form handler
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Signup form submitted'); // Debugging line
 
       const name = document.getElementById('fullName').value;
       const email = document.getElementById('email').value;
@@ -127,6 +129,7 @@
     // Login form handler
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Login form submitted'); // Debugging line
 
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
@@ -146,11 +149,12 @@
 
     // GitHub sign-up handler
     document.getElementById('github-signup').addEventListener('click', async () => {
+      console.log('GitHub signup button clicked'); // Debugging line
       const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
       if (error) {
         document.getElementById('signup-status').innerText = error.message;
       } else {
-        // Redirect to a suitable page or handle as needed
+        // Redirect or handle as needed (GitHub will handle the redirect)
         window.location.href = '/dashboard.html'; // Adjust as necessary
       }
     });
