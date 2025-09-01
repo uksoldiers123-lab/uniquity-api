@@ -37,7 +37,7 @@ app.set('stripe', stripe);
 
 // Routes
 const clientDashboardRouter = createClientDashboardRouter();
-app.use('/client-dashboard', clientDashboardRouter);
+app.use('/public/client-dashboard', clientDashboardRouter);
 
 // Stripe webhooks
 const webhookRouter = createStripeWebhookRouter(stripe);
