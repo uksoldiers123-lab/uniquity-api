@@ -4,10 +4,35 @@ const bodyParser = require('body-parser');
 const adminRoutes = require('./admin/routes'); // patch path
 
 // Middleware
-app.use(bodyParser.json());
 
-// Your existing routes...
-// TODO: preserve existing app.use(...) and routes
+const jwt = require('jsonwebtoken'); // or your preferred token lib
+
+// Replace with your real secret/public verification
+const SECRET = process.env.JWT_SECRET || 'your-secret';
+
+function requireAdmin(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.split(' ')[1]; // Bearer <token>
+
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const payload = jwt.verify(token, SECRET);
+    // Expect payload.role or payload.permissions
+    if (payload.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    // Attach user info if needed
+    req.user = payload;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+module.exports = { requireAdmin };
 
 // Mount Admin API
 app.use('/admin', adminRoutes);
