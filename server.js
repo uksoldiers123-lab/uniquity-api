@@ -1,7 +1,7 @@
 const express = require('express');
 const Stripe = require('stripe');
 const cors = require('cors');
-const { createClientDashboardRouter } = require('./routes/client-dashboard');
+const { createClientDashboardRouter } = require('.api/routes/client-dashboard.js');
 const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
 
 // Optional: Supabase auth middleware (swap in later)
