@@ -1,9 +1,15 @@
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
-const adminRoutes = require('./admin/routes'); // patch path
 
-// Middleware
+const express = require('express');
+const router = express.Router();
+const requireAdmin = require('../../middleware/requireAdmin');
+
+router.use(requireAdmin);
+
+router.get('/', (req, res) => {
+  res.json({ ok: true, message: 'Admin area', user: req.user });
+});
+
+module.exports = router;
 
 const jwt = require('jsonwebtoken'); // or your preferred token lib
 
