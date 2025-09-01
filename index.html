@@ -120,11 +120,13 @@
         password,
       });
 
+      console.log({ user, error }); // Log response from Supabase
+
       if (error) {
         document.getElementById('signup-status').innerText = error.message;
       } else {
         document.getElementById('signup-status').innerText = 'Account created! Check your email for verification.';
-
+        
         // Call API to create a dashboard login link
         const response = await fetch('/api/create-dashboard-login', {
           method: 'POST',
@@ -154,11 +156,13 @@
         password,
       });
 
+      console.log({ user, error }); // Log response from Supabase
+
       if (error) {
         document.getElementById('login-status').innerText = error.message;
       } else {
         document.getElementById('login-status').innerText = 'Login successful!';
-
+        
         // Call API to create a dashboard login link
         const response = await fetch('/api/create-dashboard-login', {
           method: 'POST',
