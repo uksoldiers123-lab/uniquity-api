@@ -1,4 +1,4 @@
-<!doctype>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -124,7 +124,7 @@
         document.getElementById('signup-status').innerText = error.message;
       } else {
         document.getElementById('signup-status').innerText = 'Account created! Check your email for verification.';
-        
+
         // Call API to create a dashboard login link
         const response = await fetch('/api/create-dashboard-login', {
           method: 'POST',
@@ -158,7 +158,7 @@
         document.getElementById('login-status').innerText = error.message;
       } else {
         document.getElementById('login-status').innerText = 'Login successful!';
-        
+
         // Call API to create a dashboard login link
         const response = await fetch('/api/create-dashboard-login', {
           method: 'POST',
