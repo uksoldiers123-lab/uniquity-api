@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="env.js"></script> <!-- Load environment variables -->
+  <script src="env.js"></script>
 </head>
 <body>
   <!-- Navbar -->
@@ -100,7 +100,6 @@
   </main>
 
   <script>
-    // Initialize Supabase client using variables from env.js
     const supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
     // Signup form handler
@@ -121,6 +120,9 @@
         document.getElementById('signup-status').innerText = error.message;
       } else {
         document.getElementById('signup-status').innerText = 'Account created! Check your email for verification.';
+
+        // Redirect based on role (if applicable)
+        // Here you might want to fetch the user role if you have a user roles table
         window.location.href = '/dashboard.html'; // Adjust as necessary
       }
     });
@@ -141,6 +143,9 @@
         document.getElementById('login-status').innerText = error.message;
       } else {
         document.getElementById('login-status').innerText = 'Login successful!';
+        
+        // Redirect based on role (if applicable)
+        // Here you might want to fetch the user role if you have a user roles table
         window.location.href = '/dashboard.html'; // Adjust as necessary
       }
     });
