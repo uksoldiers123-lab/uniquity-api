@@ -32,6 +32,11 @@ app.use(express.json());
 
 app.set('stripe', stripe);
 
+ console.log('Starting server...');
+     app.listen(port, () => {
+       console.log(`Server is running on port ${port}`);
+     });
+
 // Routes
 const clientDashboardRouter = createClientDashboardRouter();
 app.use('/public/client-dashboard', clientDashboardRouter);
