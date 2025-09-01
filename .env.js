@@ -3,7 +3,7 @@ window.APP_BASE_URL = "https://dashboard.uniquitysolutions.com";
 window.DASHBOARD_JWT_SECRET = "fhMwKBd+Fn/AKh9eVaRsadnWvSlG4PFGGfgzKHfHFK3llsHVJR+/o6PoutKOWSvkNyv2mWraUmYDx8n5buEQmg==";
 window.NEXT_PUBLIC_SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co"; // Corrected
 window.PORT = "10000"; // Port Render assigns
-window.REACT_APP_SUPABASE_KEY = "your-supabase-key"; // Ensure to use correct key
+window.REACT_APP_SUPABASE_KEY = "sb_publishable_nlnBWEaRycn4fHAMBf26Vw_Gu8TwcZ3"; // Ensure to use correct key
 window.REACT_APP_SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co";
 window.REFRESH_URL = "https://dashboard.uniquitysolutions.com/refresh";
 window.RETURN_URL = "https://dashboard.uniquitysolutions.com/dashboard";
@@ -15,5 +15,5 @@ window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXB
 // Ensure to use correct key
 window.SUPABASE_DB_URL = "postgresql://postgres:[#FREEMe24]@db.apbkobhfnmcqqzqeeqss.supabase.co:5432/postgres";
 window.SUPABASE_KEY = "your-supabase-key"; // Ensure to use correct key
-window.SUPABASE_SERVICE_ROLE_KEY = "sb_secret_s4SxH76ocPQGIdrIFxyoFg_uVyZcLXD";
+window.SUPABASE_SERVICE_ROLE_KEY = "sb_publishable_nlnBWEaRycn4fHAMBf26Vw_Gu8TwcZ3";
 window.SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co";
