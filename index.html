@@ -3,26 +3,78 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Uniquity Solutions — Login / Sign Up</title>
+  <title>Uniquity Solutions — Trusted Payments for 20+ Years</title>
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="env.js"></script> <!-- Load environment variables -->
+
+  <!-- Runtime config BEFORE your app code -->
+  <script src="/env.js"></script>
 </head>
 <body>
   <!-- Navbar -->
   <nav class="nav" aria-label="Primary">
     <div class="container nav-inner">
-      <a class="brand" href="index.html">Uniquity Solutions</a>
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Uniquity Solutions
+      </a>
+
       <div class="nav-links">
         <a href="index.html">Home</a>
-        <a href="create-account.html">Create Account</a>
-        <a href="login.html">Login</a>
+        <a href="#services">Services</a>
+        <a href="#partners">Partners</a>
+        <a href="#careers">Careers</a>
+
+        <div class="dropdown" data-dropdown>
+          <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
+            Get Started
+            <svg class="drop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="drop-menu" data-menu role="menu">
+            <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
+            <a href="https://dashboard.uniquitysolutions.com/?" role="menuitem">Create Account (Merchants)</a>
+            <a href="faq.html" role="menuitem">FAQ</a>
+            <a href="pricing.html" role="menuitem">Pricing</a>
+            <a href="developers.html" role="menuitem">Developers & API</a>
+            <a href="integrations.html" role="menuitem">Integrations</a>
+            <a href="compliance.html" role="menuitem">Compliance & Security</a>
+            <a href="https://dashboard.uniquitysolutions.com/?" role="menuitem">Login Portal</a>
+          </div>
+        </div>
+
+        <a href="#contact" class="cta">Contact</a>
       </div>
+
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>
   </nav>
+
+  <!-- Mobile overlay menu -->
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
+    <div class="menu-label">On this page</div>
+    <a href="index.html">Home</a>
+    <a href="#services">Services</a>
+    <a href="#partners">Partners</a>
+    <a href="#careers">Careers</a>
+    <a href="#contact" class="cta">Contact</a>
+
+    <div class="menu-label">More pages</div>
+    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000">Make a Payment</a>
+    <a href="https://dashboard.uniquitysolutions.com/?">Create Account (Merchants)</a>
+    <a href="faq.html">FAQ</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="developers.html">Developers & API</a>
+    <a href="integrations.html">Integrations</a>
+    <a href="compliance.html">Compliance & Security</a>
+    <a href="https://dashboard.uniquitysolutions.com/?">Login Portal</a>
+  </div>
+
 
   <main class="container">
     <!-- Signup Section -->
