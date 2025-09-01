@@ -2,7 +2,7 @@ const express = require('express');
 const Stripe = require('stripe');
 const cors = require('cors');
 const { createClientDashboardRouter } = require('./api/routes/client-dashboard.js'); // Corrected path
-const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
+const { createStripeWebhookRouter } = require('./api/routes/webhooks/stripe');
 
 const app = express();
 const port = process.env.PORT || 3000; // Set the port
@@ -41,7 +41,7 @@ app.use('/public/client-dashboard', clientDashboardRouter);
 
 // Stripe webhooks
 const webhookRouter = createStripeWebhookRouter(stripe);
-app.use('/webhooks/stripe', webhookRouter);
+app.use('api/routes/webhooks/stripe', webhookRouter);
 
 // Starting the server
 console.log('Starting server...');
