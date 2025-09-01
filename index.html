@@ -3,82 +3,92 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Uniquity Solutions — Sign In</title>
+  <title>Uniquity Solutions — Landing Page</title>
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=9">
-
-  <!-- Optional: runtime config BEFORE your app code -->
   <script src="/env.js"></script>
+  <script src="utils/supabaseClient.js" type="module"></script>
 </head>
 <body>
-  <!-- Navbar -->
+
   <nav class="nav" aria-label="Primary">
     <div class="container nav-inner">
-      <a class="brand" href="index.html">
-        <span class="brand-mark" aria-hidden="true"></span>
-        Uniquity Solutions
-      </a>
+      <a class="brand" href="landing.html">Uniquity Solutions</a>
       <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="make-payments.html">Make a Payment</a>
+        <a href="landing.html">Home</a>
         <a href="create-account.html">Create Account</a>
-        <a href="faq.html">FAQ</a>
-        <a href="pricing.html">Pricing</a>
-        <a href="login.html" aria-current="page">Login</a>
+        <a href="login.html">Login</a>
       </div>
     </div>
   </nav>
 
-  <!-- Mobile overlay menu (optional) -->
-  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation" style="display:none;">
-    <div class="menu-label">On this page</div>
-    <a href="index.html">Home</a>
-    <a href="make-payments.html">Make a Payment</a>
-    <a href="create-account.html">Create Account</a>
-    <a href="login.html" aria-current="page">Login</a>
-  </div>
-
-  <!-- Main login panel -->
-  <main class="container" role="main" aria-label="Login">
-    <section class="card" style="margin-top:40px; max-width:720px; margin-left:auto; margin-right:auto;">
-      <header class="card-header" style="padding:16px 18px; border-bottom:1px solid #e5e7eb;">
-        <h1 class="card-title" style="margin:0; font-size: 24px;">Sign In</h1>
+  <main class="container">
+    <section class="card" style="max-width:720px; margin: 40px auto;">
+      <header class="card-header">
+        <h1 class="card-title">Welcome to Uniquity Solutions</h1>
       </header>
-      <form id="loginForm" style="padding: 18px;" onsubmit="handleLogin(event)">
-        <label for="email" style="display: block; margin-bottom: 8px;">Email</label>
-        <input type="email" id="email" name="email" required style="width: 100%; padding: 8px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px;"/>
 
-        <label for="password" style="display: block; margin-bottom: 8px;">Password</label>
-        <input type="password" id="password" name="password" required style="width: 100%; padding: 8px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px;"/>
-
-        <button type="submit" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          Sign In
-        </button>
-        <div id="errorMessage" style="color: red; margin-top: 12px;"></div>
+      <!-- Account creation form -->
+      <form id="createAccountForm" onsubmit="handleCreateAccount(event)">
+        <h2>Create Account</h2>
+        <label for="newEmail">Email:</label>
+        <input type="email" id="newEmail" required>
+        <label for="newPassword">Password:</label>
+        <input type="password" id="newPassword" required>
+        <button type="submit">Create Account</button>
       </form>
-      <footer style="padding: 16px; text-align: center;">
-        <p>Don't have an account? <a href="create-account.html">Create one</a></p>
-      </footer>
+
+      <!-- Login form -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <h2>Login</h2>
+        <label for="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" required>
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" required>
+        <button type="submit">Login</button>
+      </form>
+
+      <div id="message" style="color: red;"></div>
     </section>
   </main>
 
   <script>
-    function handleLogin(event) {
+    import { supabase } from './utils/supabaseClient.js';
+
+    // Handle account creation
+    async function handleCreateAccount(event) {
       event.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = document.getElementById('newEmail').value;
+      const password = document.getElementById('newPassword').value;
 
-      // Placeholder for your login logic
-      // For example, using fetch to call your login API
-      console.log('Logging in with', email, password);
+      const { user, error } = await supabase.auth.signUp({ email, password });
 
-      // Here you would typically handle the login process
-      // If there's an error, display it in the errorMessage div
-      // document.getElementById('errorMessage').innerText = "Login failed. Please try again.";
+      if (error) {
+        document.getElementById('message').innerText = error.message;
+      } else {
+        document.getElementById('message').innerText = 'Account created! Please check your email for verification.';
+      }
+    }
+
+    // Handle login
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const { user, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        document.getElementById('message').innerText = error.message;
+      } else {
+        document.getElementById('message').innerText = 'Login successful!';
+        // Redirect to dashboard or another page
+        window.location.href = 'dashboard.html'; // Adjust as necessary
+      }
     }
   </script>
-  
+
 </body>
 </html>
