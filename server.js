@@ -1,11 +1,8 @@
 const express = require('express');
 const Stripe = require('stripe');
 const cors = require('cors');
-const { createClientDashboardRouter } = require('.api/routes/client-dashboard.js');
+const { createClientDashboardRouter } = require('./api/routes/client-dashboard.js'); // Corrected path
 const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
-
-// Optional: Supabase auth middleware (swap in later)
- // const { supabaseAuthMiddleware } = require('./middleware/supabase-auth');
 
 const app = express();
 
@@ -28,7 +25,7 @@ app.use(cors({
     if (!origin) return cb(null, true);
     cb(null, ALLOWED_ORIGINS.includes(origin));
   },
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Id']
 }));
 app.use(express.json());
