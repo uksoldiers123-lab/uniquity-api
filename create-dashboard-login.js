@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
@@ -22,6 +23,7 @@ if (!DASHBOARD_JWT_SECRET) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+// Endpoint to create a dashboard login link
 app.post('/api/create-dashboard-login', async (req, res) => {
   try {
     const { userId, email } = req.body;
@@ -30,8 +32,7 @@ app.post('/api/create-dashboard-login', async (req, res) => {
       return res.status(400).json({ error: 'Missing userId or email' });
     }
 
-    // Verify user exists on the backend (server-side)
-    // Note: make sure the admin API is supported by your Supabase version
+    // Verify user exists on the backend
     const { data, error } = await supabase.auth.admin.getUserById(userId);
 
     if (error || !data?.user) {
@@ -53,4 +54,4 @@ app.post('/api/create-dashboard-login', async (req, res) => {
 
 // Use a specific port via env or default to 3000
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Auth service listening on port ${port}`));
+app.listen(port, () => console.log(`Server listening on port ${port}`));
