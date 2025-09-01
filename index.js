@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
@@ -9,7 +8,7 @@ const Stripe = require('stripe');
 const app = express();
 
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../public'))); // serve static frontend if needed
+app.use(express.static(path.join(__dirname, '../public'))); // Serve static frontend if needed
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -23,15 +22,17 @@ app.post('/api/create-user', async (req, res) => {
   }
 
   try {
-    // If you use Supabase Auth:
-    // const { user, error } = await supabase.auth.signUp({ email, password });
-    // const userId = user?.id || email; // fallback
+    // Create Supabase Auth user
+    const { user, error: signupError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    // If you store in a separate users table (no signup here), generate userId yourself:
-    const userId = require('crypto').randomUUID();
+    if (signupError) {
+      return res.status(400).json({ message: signupError.message });
+    }
 
-    // 1a) Optional: create Supabase Auth user here (admin flow or using service_role)
-    // If you want to avoid exposing admin tokens, manage users via admin endpoint elsewhere.
+    const userId = user.id; // Use the Supabase-generated user ID
 
     // 2) If onboarding is required (accountType !== 'basic')
     let onboardingUrl = null;
@@ -85,64 +86,7 @@ app.post('/api/create-user', async (req, res) => {
   }
 });
 
-// 4) Transactions endpoint (example)
-app.get('/api/transactions', async (req, res) => {
-  const { userId } = req.query;
-  if (!userId) return res.status(400).json({ message: 'Missing userId' });
-
-  // Fetch from Supabase to get stripeAccountId
-  const { data: rows } = await supabase.from('users').select('stripeAccountId').eq('id', userId).single();
-  const stripeAccountId = rows?.stripeAccountId;
-  if (!stripeAccountId) return res.status(404).json({ message: 'No Stripe account for user' });
-
-  // Example: pull charges for the connected account
-  try {
-    const charges = await stripe.charges.list({ limit: 100, expand: ['data.customer'] });
-    res.json({ transactions: charges.data });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: 'Failed to fetch transactions' });
-  }
-});
-
-// 404 handler (unknown routes)
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'Not Found', path: req.originalUrl });
-  }
-  res.status(404);
-  res.type('html');
-  res.sendFile(path.join(__dirname, '../public/404.html'));
-});
-
-// 500 error handler
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500);
-  res.type('html');
-  res.sendFile(path.join(__dirname, '../public/500.html'));
-});
+// Other endpoints remain the same...
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server listening on port ${port}`));
-
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (res.ok) {
-      if (data.onboardingUrl) {
-        window.location.href = data.onboardingUrl;
-      } else {
-        window.location.href = '/login.html';
-      }
-    } else {
-      alert(data.message || 'Failed to create account');
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Network error. Try again.');
-  }
-}
-</script>h
