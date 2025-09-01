@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Backend API for Uniquity Solutions",
   "type": "commonjs",
-  "main": "backend/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "build": "echo \"no build step for API\""
   },
   "dependencies": {
