@@ -1,3 +1,4 @@
+
 const express = require('express');
 const { Client } = require('pg');
 const router = express.Router();
@@ -14,12 +15,11 @@ function createClientDashboardRouter() {
     return next();
   }
 
-  // Env-driven DB client
+  // Env-driven DB client (pool is recommended for production)
   function getDbClient() {
     const dbUrl = process.env.SUPABASE_DB_URL;
     if (!dbUrl) throw new Error('SUPABASE_DB_URL not configured');
-    // Use pg client; ensure SSL if needed by your provider
-    return new (require('pg')).Client({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
+    return new Client({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
   }
 
   // Stripe client from app (server glue will attach)
@@ -39,7 +39,6 @@ function createClientDashboardRouter() {
     try {
       await db.connect();
 
-      // Look up connected account for the client
       const ca = await db.query(
         'SELECT stripe_account_id FROM connect_accounts WHERE client_id = $1 ORDER BY id DESC LIMIT 1',
         [clientId]
@@ -49,13 +48,11 @@ function createClientDashboardRouter() {
         return res.status(400).json({ error: 'No connected Stripe account for client' });
       }
 
-      // Create a payout on the connected account
       const payout = await stripe.payouts.create(
         { amount: Number(amount), currency },
         { stripeAccount: connectedAccountId }
       );
 
-      // Ensure payouts table exists; create if missing
       await db.query(`
         CREATE TABLE IF NOT EXISTS payouts (
           id SERIAL PRIMARY KEY,
@@ -68,7 +65,6 @@ function createClientDashboardRouter() {
         )
       `);
 
-      // Insert payout record
       await db.query(
         'INSERT INTO payouts (client_id, payout_id, amount, currency, status, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
         [clientId, payout.id, amount, currency, payout.status]
@@ -83,7 +79,6 @@ function createClientDashboardRouter() {
   });
 
   // GET /client/:clientId/payouts
-  // Return payout history for the client
   router.get('/client/:clientId/payouts', requireClientOwner, async (req, res) => {
     const { clientId } = req.params;
     const db = getDbClient();
@@ -102,8 +97,6 @@ function createClientDashboardRouter() {
     }
   });
 
-  // Expose a minimal placeholder for existing routes (dashboard/payments) if you implement later
-  // Ensure you export the router
   return router;
 }
 
