@@ -5,6 +5,7 @@ const { createClientDashboardRouter } = require('./api/routes/client-dashboard.j
 const { createStripeWebhookRouter } = require('./routes/webhooks/stripe');
 
 const app = express();
+const port = process.env.PORT || 3000; // Set the port
 
 // Env vars (read from .env)
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
@@ -20,6 +21,7 @@ const ALLOWED_ORIGINS = (
   `${APP_BASE_URL},https://dashboard.uniquitysolutions.com`
 ).split(',').map(s => s.trim()).filter(Boolean);
 
+// Middleware
 app.use(cors({
   origin: function(origin, cb) {
     if (!origin) return cb(null, true);
@@ -30,12 +32,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Set Stripe instance
 app.set('stripe', stripe);
-
- console.log('Starting server...');
-     app.listen(port, () => {
-       console.log(`Server is running on port ${port}`);
-     });
 
 // Routes
 const clientDashboardRouter = createClientDashboardRouter();
@@ -45,4 +43,11 @@ app.use('/public/client-dashboard', clientDashboardRouter);
 const webhookRouter = createStripeWebhookRouter(stripe);
 app.use('/webhooks/stripe', webhookRouter);
 
+// Starting the server
+console.log('Starting server...');
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
 module.exports = app;
+
