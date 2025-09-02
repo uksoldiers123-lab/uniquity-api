@@ -3,250 +3,185 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Uniquity Solutions — Trusted Payments for 20+ Years</title>
+  <title>Uniquity Solutions — Public Landing</title>
 
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=9">
 
-  <!-- Runtime config BEFORE your app code -->
-  <script src="/env.js"></script>
+  <!-- Your existing CSS (styles.css) -->
+  <link rel="stylesheet" href="styles.css?v=9" />
 </head>
 <body>
-  <!-- Navbar -->
+  <!-- Landing header (distinct from admin/client dashboards) -->
   <nav class="nav" aria-label="Primary">
     <div class="container nav-inner">
-      <a class="brand" href="https://www.uniquitysolutions.com/index.html">
+      <a class="brand" href="index.html">
         <span class="brand-mark" aria-hidden="true"></span>
         Uniquity Solutions
       </a>
-
-      <div class="nav-links">
-        <a href="https://www.uniquitysolutions.com/index.html">Home</a>
-        <a href="https://www.uniquitysolutions.com/services.html">Services</a>
-        <a href="https://www.uniquitysolutions.com/partners.html">Partners</a>
-        <a href="#careers">Careers</a>
-
-        <div class="dropdown" data-dropdown>
-          <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
-            Get Started
-            <svg class="drop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="drop-menu" data-menu role="menu">
-            <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
-            <a href="https://dashboard.uniquitysolutions.com/?" role="menuitem">Create Account (Merchants)</a>
-            <a href="https://www.uniquitysolutions.com/faq.html" role="menuitem">FAQ</a>
-            <a href="https://www.uniquitysolutions.com/pricing.html" role="menuitem">Pricing</a>
-            <a href="https://www.uniquitysolutions.com/developers.html" role="menuitem">Developers & API</a>
-            <a href="https://www.uniquitysolutions.com/integrations.html" role="menuitem">Integrations</a>
-            <a href="https://www.uniquitysolutions.com/compliance.html" role="menuitem">Compliance & Security</a>
-            <a href="https://dashboard.uniquitysolutions.com/?" role="menuitem">Login Portal</a>
-          </div>
-        </div>
-
-        <a href="#contact" class="cta">Contact</a>
+      <div class="nav-links" aria-label="Main navigation">
+        <a href="#home" style="color:#fff; text-decoration:none; margin-right:8px;">Home</a>
+        <a href="#services" style="color:#fff; text-decoration:none; margin-right:8px;">Services</a>
+        <a href="#partners" style="color:#fff; text-decoration:none; margin-right:8px;">Partners</a>
+        <a href="#careers" style="color:#fff; text-decoration:none; margin-right:8px;">Careers</a>
+        <a href="#contact" class="cta" style="color:#fff; text-decoration:none; border:1px solid rgba(255,255,255,.6); padding:8px 12px; border-radius:8px;">Contact</a>
       </div>
-
-      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
     </div>
   </nav>
 
-  <!-- Mobile overlay menu -->
-  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
-    <div class="menu-label">On this page</div>
-    <a href="index.html">Home</a>
-    <a href="#services">Services</a>
-    <a href="#partners">Partners</a>
-    <a href="#careers">Careers</a>
-    <a href="#contact" class="cta">Contact</a>
-
-    <div class="menu-label">More pages</div>
-    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000">Make a Payment</a>
-    <a href="https://dashboard.uniquitysolutions.com/?">Create Account (Merchants)</a>
-    <a href="faq.html">FAQ</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="developers.html">Developers & API</a>
-    <a href="integrations.html">Integrations</a>
-    <a href="compliance.html">Compliance & Security</a>
-    <a href="https://dashboard.uniquitysolutions.com/?">Login Portal</a>
-  </div>
-
-
-  <main class="container">
-    <!-- Signup Section -->
-    <section class="signup-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-      <h1 style="text-align:center;">Create Account</h1>
-      <form id="signupForm" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
-        <div>
-          <label>Full Name
-            <input type="text" id="fullName" placeholder="Jane Doe" required />
-          </label>
-        </div>
-        <div>
-          <label>Email
-            <input type="email" id="email" placeholder="you@example.com" required />
-          </label>
-        </div>
-        <div>
-          <label>Password
-            <input type="password" id="password" placeholder="Create a password" required />
-          </label>
-        </div>
-
-        <div>
-          <label>Company / Tenant Name
-            <input type="text" id="tenantName" placeholder="Acme LLC" required />
-          </label>
-        </div>
-
-        <div style="text-align:center;">
-          <button type="submit" id="signup-btn" style="padding: .75rem 1.25rem; font-size: 1rem; background-color: #007bff; color: white; border: none; border-radius: 4px;">
-            Create Account
-          </button>
-        </div>
-
-        <div id="signup-status" aria-live="polite" style="color: #d00;"></div>
-      </form>
-
-      <hr style="margin: 20px 0;" />
-
-      <button id="github-signup" aria-label="Sign up with GitHub" style="padding: .75rem 1rem; background-color: #333; color: white; border: none; border-radius: 4px;">
-        Sign up with GitHub
-      </button>
-
-      <p style="text-align:center; margin-top:.75rem; color:#666;">
-        After sign-up, you’ll be redirected to your dashboard based on your role.
-      </p>
+  <!-- Landing content with unified auth panel -->
+  <main class="container" id="home" aria-label="Public Landing" style="max-width:1100px; margin:0 auto; padding:20px;">
+    <section class="hero" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px;">
+      <h1>Uniquity Solutions – Trusted Payments for 20+ Years</h1>
+      <p>Sign up or sign in to access your tenant or admin dashboard. Your data and access are scoped to your account's role.</p>
     </section>
 
-    <!-- Login Section -->
-    <section class="login-section" style="max-width:960px; margin: 40px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-      <h1 style="text-align:center;">Login</h1>
-      <form id="loginForm" style="display:grid; grid-template-columns: 1fr; gap:1rem;">
-        <div>
-          <label>Email
-            <input type="email" id="loginEmail" placeholder="you@example.com" required />
-          </label>
-        </div>
-        <div>
-          <label>Password
-            <input type="password" id="loginPassword" placeholder="Enter your password" required />
-          </label>
-        </div>
-
-        <div style="text-align:center;">
-          <button type="submit" id="login-btn" style="padding: .75rem 1.25rem; font-size: 1rem; background-color: #FF6FF00; color: white; border: none; border-radius: 4px;">
-            Login
-          </button>
+    <section class="grid" aria-label="Auth panel" style="display:grid; grid-template-columns:360px 1fr; gap:16px; padding-top:20px;">
+      <!-- Left: Unified signup + login -->
+      <aside aria-label="Signup / Login">
+        <div class="section-title" style="margin-bottom:6px;">Create Account</div>
+        <div style="display:grid; gap:8px;">
+          <input id="signupEmail" class="input" type="email" placeholder="Email" />
+          <input id="signupPassword" class="input" type="password" placeholder="Password" />
+          <input id="signupCompany" class="input" type="text" placeholder="Company name (tenant)" />
+          <select id="signupRole" class="input" aria-label="Role (optional)">
+            <option value="">Select role (optional)</option>
+            <option value="admin">Admin</option>
+            <option value="tenant-admin">Tenant Admin</option>
+            <option value="tenant-user">Tenant User</option>
+            <option value="staff">Staff</option>
+          </select>
+          <button id="btnSignup" class="btn" style="width:100%;">Create Account</button>
         </div>
 
-        <div id="login-status" aria-live="polite" style="color: #d00;"></div>
-      </form>
+        <hr style="margin:12px 0;" />
 
-      <p style="text-align:center; margin-top:.75rem; color:#666;">
-        Don't have an account? <a href="#" id="showSignup">Create one</a>
-      </p>
+        <div class="section-title" style="margin-bottom:6px;">Login</div>
+        <div style="display:grid; gap:8px;">
+          <input id="loginEmail" class="input" type="email" placeholder="Email" />
+          <input id="loginPassword" class="input" type="password" placeholder="Password" />
+          <button id="btnLogin" class="btn" style="width:100%;">Login</button>
+        </div>
+
+        <p id="authStatus" style="color:#e11; display:none; margin-top:8px;"></p>
+      </aside>
+
+      <!-- Right column: placeholder for marketing/content -->
+      <section aria-label="Public info" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
+        <h3>Public Information</h3>
+        <p>Overview, pricing, and integrations. The landing page is intentionally lightweight.</p>
+      </section>
     </section>
   </main>
 
   <script>
-    // Initialize Supabase client
-    const supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    // Config: update to your real backend if you have one; for this drop-in, we’ll route to your Express endpoints
+    // If you want to bypass a backend temporarily and use Supabase directly from the client (not recommended long-term),
+    // you could wire the Supabase JS client here instead.
+    const API_BASE = "https://your-backend.example.com/api/v1";
 
-    // Signup form handler
-    document.getElementById('signupForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      console.log('Signup form submitted'); // Debugging line
+    function setSession(token, tenant_id, user_id, role) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("tenant_id", tenant_id);
+      localStorage.setItem("user_id", user_id);
+      localStorage.setItem("role", role);
+    }
 
-      const name = document.getElementById('fullName').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const tenantName = document.getElementById('tenantName').value;
-
-      const { user, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      console.log('Signup response:', { user, error }); // Log the response from Supabase
-
-      if (error) {
-        document.getElementById('signup-status').innerText = error.message;
+    function navigateToDashboard(role) {
+      // Route based on role
+      if (role === "admin" || role === "tenant-admin" && false) {
+        // Adjust: if you want admin to always go admin-dashboard
+        window.location.href = "/admin-dashboard.html";
       } else {
-        document.getElementById('signup-status').innerText = 'Account created! Check your email for verification.';
-        
-        // Call API to create a dashboard login link (if needed)
-        const response = await fetch('/api/create-dashboard-login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, email: user.email })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          window.location.href = data.dashboardUrl; // Redirect to the dashboard
-        } else {
-          alert(data.error); // Show error message
-        }
+        window.location.href = "/tenant-dashboard.html";
       }
-    });
+    }
 
-    // Login form handler
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      console.log('Login form submitted'); // Debugging line
+    function showStatus(msg) {
+      const el = document.getElementById("authStatus");
+      el.textContent = msg;
+      el.style.display = "block";
+      el.style.color = "#e11";
+    }
 
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      const { user, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+    async function signup(email, password, company_name, role) {
+      const body = { email, password };
+      if (company_name) body.company_name = company_name;
+      if (role) body.role = role;
+      const res = await fetch(API_BASE + "/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
+      return res.json();
+    }
 
-      console.log('Login response:', { user, error }); // Log the response from Supabase
+    async function login(email, password) {
+      const res = await fetch(API_BASE + "/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      return res.json();
+    }
 
-      if (error) {
-        document.getElementById('login-status').innerText = error.message;
-      } else {
-        document.getElementById('login-status').innerText = 'Login successful!';
-        
-        // Call API to create a dashboard login link
-        const response = await fetch('/api/create-dashboard-login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, email: user.email })
-        });
+    document.getElementById("btnSignup").addEventListener("click", async () => {
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+      const company = document.getElementById("signupCompany").value;
+      const role = document.getElementById("signupRole").value;
 
-        const data = await response.json();
-        if (response.ok) {
-          window.location.href = data.dashboardUrl; // Redirect to the dashboard
+      if (!email || !password) {
+        showStatus("Please enter email and password.");
+        return;
+      }
+
+      try {
+        const data = await signup(email, password, company, role);
+        if (data?.token) {
+          setSession(data.token, data.tenant_id, data.user_id, data.role);
+          navigateToDashboard(data.role);
+        } else if (data?.error) {
+          showStatus(data.error);
         } else {
-          alert(data.error); // Show error message
+          // Fallback: attempt login with same creds
+          const loginRes = await login(email, password);
+          if (loginRes?.token) {
+            setSession(loginRes.token, loginRes.tenant_id, loginRes.user_id, loginRes.role);
+            navigateToDashboard(loginRes.role);
+          } else {
+            showStatus("Signup failed. Please try again.");
+          }
         }
+      } catch (e) {
+        console.error(e);
+        showStatus("Signup error");
       }
     });
 
-    // GitHub sign-up handler
-    document.getElementById('github-signup').addEventListener('click', async () => {
-      console.log('GitHub signup button clicked'); // Debugging line
-      const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
-      if (error) {
-        document.getElementById('signup-status').innerText = error.message;
-      }
-    });
+    document.getElementById("btnLogin").addEventListener("click", async () => {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
 
-    // Optional: Toggle between login and signup
-    document.getElementById('showSignup').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.querySelector('.login-section').style.display = 'none';
-      document.querySelector('.signup-section').style.display = 'block';
+      if (!email || !password) {
+        showStatus("Please enter email and password.");
+        return;
+      }
+
+      try {
+        const data = await login(email, password);
+        if (data?.token) {
+          setSession(data.token, data.tenant_id, data.user_id, data.role);
+          navigateToDashboard(data.role);
+        } else {
+          showStatus(data?.error || "Login failed");
+        }
+      } catch (e) {
+        console.error(e);
+        showStatus("Login error");
+      }
     });
   </script>
-
 </body>
 </html>
