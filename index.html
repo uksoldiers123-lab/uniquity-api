@@ -2,67 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <title>Uniquity Solutions — Public Landing</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Uniquity Solutions — Trusted Payments for 20+ Years</title>
-
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=9">
-
-  <!-- Runtime config BEFORE your app code -->
-  <script src="/env.js"></script>
-</head>
-<body>
-  <!-- Navbar -->
-  <nav class="nav" aria-label="Primary">
-    <div class="container nav-inner">
-      <a class="brand" href="https://www.uniquitysolutions.com/index.html">
-        <span class="brand-mark" aria-hidden="true"></span>
-        Uniquity Solutions
-      </a>
-
-      <div class="nav-links">
-        <a href="https://www.uniquitysolutions.com/index.html">Home</a>
-        <a href="https://www.uniquitysolutions.com/services.html">Services</a>
-        <a href="https://www.uniquitysolutions.com/partners.html">Partners</a>
-        <a href="https://www.uniquitysolutions.com/careers.html">Careers</a>
-
-        <div class="dropdown" data-dropdown>
-          <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
-            Get Started
-            <svg class="drop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="drop-menu" data-menu role="menu">
-            <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
-            <a href="https://dashboard.uniquitysolutions.com/?" role="menuitem">Create Account (Merchants)</a>
-            <a href="https://www.uniquitysolutions.com/faq.html" role="menuitem">FAQ</a>
-            <a href="https://www.uniquitysolutions.com/pricing.html" role="menuitem">Pricing</a>
-            <a href="https://www.uniquitysolutions.com/developers.html" role="menuitem">Developers & API</a>
-            <a href="https://www.uniquitysolutions.com/integrations.html" role="menuitem">Integrations</a>
-            <a href="https://www.uniquitysolutions.com/compliance.html" role="menuitem">Compliance & Security</a>
-            <a href="https://dashboard.uniquitysolutions.com/?" role="menuitem">Login Portal</a>
-          </div>
-        </div>
-
   <style>
-    /* New compact, mobile-friendly styling (no external CSS) */
+    /* Inline, mobile-friendly styling (no external CSS) */
     :root {
       --bg: #96A3B1;
       --text: #1f2937;
       --muted: #4b5563;
       --card: #ffffff;
       --primary: #e94b4b;
-      --primary-700: #d13f3f;
       --accent: #fbbf24;
-      --ring: rgba(0,0,0,.08);
       --shadow: 0 10px 30px rgba(2,6,23,.15);
       --radius: 18px;
       --nav-h: 56px;
-      --btn: #e53e3e;
     }
-
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
 
@@ -80,31 +34,26 @@
     /* Landing container */
     .container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 16px; }
 
-    /* Hero / intro */
+    /* Hero intro */
     .hero { padding: 20px; border-radius: 12px; background:#fff; border:1px solid #e5e7eb; box-shadow: 0 6px 20px rgba(0,0,0,.04); margin: 20px 0; }
-    .hero h1 { font-size: clamp(24px, 6vw, 40px); margin: 0 0 8px; color: #1f2937; }
-    .lead { color:#4b5563; font-size: 16px; margin:0 0 8px; }
+    .hero h1 { font-size: clamp(22px, 6vw, 40px); margin: 0 0 8px; color:#1f2937; }
+    .lead { color:#4b5563; font-size: 16px; margin: 0 0 8px; }
 
-    /* Auth panel (mobile-friendly) */
+    /* Auth panel (mobile-first) */
     .auth-wrap { display:flex; justify-content:center; padding: 8px; }
-    .auth-card {
-      width: 100%; max-width: 420px;
-      background: #fff; border:1px solid #e5e7eb; border-radius: 12px; padding: 16px;
-      box-shadow: var(--shadow);
-    }
-    .auth-tabs { display:flex; border-bottom:1px solid #eee; margin-bottom: 10px; }
-    .auth-tabs button { flex:1; padding: 12px; border:0; background: #fff; font-weight:700; cursor:pointer; }
+    .auth-card { width: 100%; max-width: 420px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow: var(--shadow); }
+    .auth-tabs { display:flex; border-bottom:1px solid #eee; margin-bottom:8px; }
+    .auth-tabs button { flex:1; padding:12px; border:0; background:#fff; font-weight:700; cursor:pointer; }
     .auth-form { display:flex; flex-direction:column; gap:10px; }
-    input, button { font:inherit; }
-    .input { padding: 12px; border:1px solid #ddd; border-radius: 8px; width:100%; }
-    .btn { padding: 12px 14px; border-radius: 8px; border:0; font-weight:700; cursor: pointer; }
+    input { font: inherit; padding: 12px; border:1px solid #ddd; border-radius:8px; width:100%; }
+    .btn { padding: 12px 14px; border-radius: 8px; border:0; font-weight:700; cursor:pointer; }
     .btn.primary { background: var(--primary); color:#fff; }
-    .btn.ghost { background:#fff; color: #111827; border:1px solid #e5e7eb; }
+    .btn.ghost { background:#fff; color:#111; border:1px solid #ddd; }
     .status { min-height: 18px; margin-top: 6px; font-size: 14px; color:#e11; }
 
-    /* Grid and responsiveness for larger layouts (optional future use) */
-    @media (min-width: 860px) {
-      .grid-two { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (min-width: 700px) {
+      /* Optional two-column vibe for wider screens in future */
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     }
   </style>
 </head>
@@ -115,92 +64,88 @@
         <span class="brand-mark" aria-hidden="true"></span>
         <span>Uniquity Solutions</span>
       </div>
-      <div class="row" style="display:flex; gap:8px;">
-        <!-- optional future nav items -->
-      </div>
     </div>
   </nav>
 
-  <section class="container" id="home" aria-label="Public Landing">
-    <div class="hero" role="region" aria-label="Intro">
+  <main class="container" id="home" aria-label="Public Landing">
+    <section class="hero" aria-label="Intro">
       <h1>Uniquity Solutions — Trusted Payments for 20+ Years</h1>
       <p class="lead">Sign up or sign in. Your session will be linked to a tenant and you’ll access a dashboard scoped to your tenant and role. Stripe onboarding can be toggled per tenant and enabled later.</p>
-    </div>
+    </section>
 
-    <div class="auth-wrap" aria-label="Signup and Login" style="margin-top: 12px;">
+    <section class="auth-wrap" aria-label="Signup and Login" style="margin-top: 6px;">
       <div class="auth-card" id="authCard" style="width:100%;">
-        <div class="auth-tabs" id="authTabs" role="tablist" aria-label="Auth tabs">
+        <div class="auth-tabs" id="authTabs" role="tablist" aria-label="Auth tabs" style="margin-bottom:8px;">
           <button id="tab-signup" role="tab" aria-selected="true" style="border-right:1px solid #eee;">Create Account</button>
           <button id="tab-login" role="tab" aria-selected="false" style="border-left:1px solid #eee;">Login</button>
         </div>
 
-        <div class="auth-forms" id="authForms" style="padding-top:8px;">
+        <div class="auth-forms" id="authForms" style="padding-top:4px;">
           <!-- Sign Up Form -->
           <form id="signup-form" class="auth-form" autocomplete="off" style="display:flex; flex-direction:column;">
-            <input id="signupEmail" class="input" type="email" placeholder="Email" required />
-            <input id="signupPassword" class="input" type="password" placeholder="Password" required />
-            <input id="signupCompany" class="input" type="text" placeholder="Company name (tenant)" required />
+            <input id="signupEmail" type="email" placeholder="Email" required />
+            <input id="signupPassword" type="password" placeholder="Password" required />
+            <input id="signupCompany" type="text" placeholder="Company name (tenant)" required />
             <label style="display:flex; align-items:center; gap:8px;">
               <input id="enableStripeOnboard" type="checkbox" />
               Stripe onboarding (Express) after signup
             </label>
-            <button id="btnSignup" class="btn primary" type="button">Create Account</button>
+            <button id="btnSignup" type="button" class="btn primary" style="width:100%;">Create Account</button>
             <div id="signupStatus" class="status" aria-live="polite"></div>
           </form>
 
           <!-- Login Form -->
           <form id="login-form" class="auth-form" autocomplete="off" style="display:none;">
-            <input id="loginEmail" class="input" type="email" placeholder="Email" required />
-            <input id="loginPassword" class="input" type="password" placeholder="Password" required />
-            <button id="btnLogin" class="btn primary" type="button">Login</button>
+            <input id="loginEmail" type="email" placeholder="Email" required />
+            <input id="loginPassword" type="password" placeholder="Password" required />
+            <button id="btnLogin" type="button" class="btn primary" style="width:100%;">Login</button>
             <div id="loginStatus" class="status" aria-live="polite"></div>
           </form>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Tokenless: public env.js provides SUPABASE_URL & SUPABASE_ANON_KEY -->
+  </main>
+
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-  <script>
-    // Ensure env.js loads before this script runs
-    if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
-      console.error("Missing public Supabase config. Please add public env.js with SUPABASE_URL and SUPABASE_ANON_KEY.");
-    }
 
+  <!-- Your public env.js (public keys only) -->
+  <script src="/env.js"></script>
+
+  <script>
+    // Initialize Supabase client from public keys
     const SUPABASE_URL = window.SUPABASE_URL;
     const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
     const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Tabs
-    const tabSignup = document.getElementById("tab-signup");
-    const tabLogin = document.getElementById("tab-login");
-    const signupForm = document.getElementById("signup-form");
-    const loginForm = document.getElementById("login-form");
-
-    tabSignup.addEventListener("click", () => {
-      signupForm.style.display = "flex";
-      loginForm.style.display = "none";
-      tabSignup.setAttribute("aria-selected", "true");
-      tabLogin.setAttribute("aria-selected", "false");
-    });
-    tabLogin.addEventListener("click", () => {
-      signupForm.style.display = "none";
-      loginForm.style.display = "flex";
-      tabSignup.setAttribute("aria-selected", "false");
-      tabLogin.setAttribute("aria-selected", "true");
-    });
-
-    // Helpers
     function setStatus(el, msg, isError = true) {
       if (!el) return;
       el.textContent = msg;
-      el.style.color = isError ? "#e11" : "#1e40af";
+      el.style.color = isError ? '#e11' : '#1e40af';
     }
 
-    // MVP signup: create/find tenant, create user via Auth, map to tenant
+    // Tab toggling
+    const signupTab = document.getElementById('tab-signup');
+    const loginTab = document.getElementById('tab-login');
+    const signupForm = document.getElementById('signup-form');
+    const loginForm = document.getElementById('login-form');
+    signupTab.addEventListener('click', () => {
+      signupForm.style.display = 'flex';
+      loginForm.style.display = 'none';
+      signupTab.setAttribute('aria-selected', 'true');
+      loginTab.setAttribute('aria-selected', 'false');
+    });
+    loginTab.addEventListener('click', () => {
+      signupForm.style.display = 'none';
+      loginForm.style.display = 'flex';
+      signupTab.setAttribute('aria-selected', 'false');
+      loginTab.setAttribute('aria-selected', 'true');
+    });
+
+    // MVP signup: create tenant + user (tenant-user by default)
     async function signup(email, password, company_name, onboard) {
-      // 1) find or create company
+      // 1) Find or create company
       let tenant_id = null;
       const { data: existing } = await supabase.from("public.companies").select("id").eq("name", company_name).maybeSingle();
       if (existing?.id) {
@@ -211,50 +156,47 @@
         tenant_id = newComp?.id || null;
       }
 
-      // 2) Sign up user via Supabase Auth
+      // 2) Sign up user via Auth
       const { user, error } = await supabase.auth.signUp({ email, password });
       if (error) return { error: error.message };
 
-      // 3) Map user to tenant: insert into public.users (simple MVP)
-      await supabase.from("public.users").insert({ email, tenant_id, role: "tenant-user" }).probablySafe();
+      // 3) Map user to tenant (store in public.users)
+      await supabase.from("public.users").insert({ email, tenant_id, role: "tenant-user" }).maybeSingle();
 
-      // 4) Get a session token
-      const { data: session } = await supabase.auth.getSession();
+      // 4) Get session token
+      const session = await supabase.auth.getSession();
       const token = session?.data?.session?.access_token ?? null;
-
       return { user_id: user?.id ?? null, tenant_id, role: "tenant-user", token, onboarding_complete: !!onboard };
     }
 
-    // 3) Login flow
     async function login(email, password) {
       const { data, error } = await supabase.auth.signIn({ email, password });
       if (error) return { error: error.message };
 
-      const { data: userRow } = await supabase.from("public.users").select("user_id: id, tenant_id, role").eq("email", email).maybeSingle();
+      const { data: userRow } = await supabase.from("public.users").select("id as user_id, tenant_id, role").eq("email", email).maybeSingle();
       const user_id = userRow?.user_id ?? data?.user?.id ?? null;
       const tenant_id = userRow?.tenant_id ?? null;
       const role = userRow?.role ?? "tenant-user";
-
       const token = data?.session?.access_token ?? null;
       return { token, user_id, tenant_id, role };
     }
 
     // Handlers
-    document.getElementById("btnSignup").addEventListener("click", async () => {
-      const email = document.getElementById("signupEmail").value;
-      const password = document.getElementById("signupPassword").value;
-      const company = document.getElementById("signupCompany").value;
-      const onboard = document.getElementById("enableStripeOnboard").checked;
+    document.getElementById('btnSignup').addEventListener('click', async () => {
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const company = document.getElementById('signupCompany').value;
+      const onboard = document.getElementById('enableStripeOnboard').checked;
 
       if (!email || !password || !company) {
-        setStatus(document.getElementById("signupStatus"), "Please fill Email, Password, and Company.", true);
+        setStatus(document.getElementById('signupStatus'), "Email, Password and Company are required.", true);
         return;
       }
 
       try {
         const res = await signup(email, password, company, onboard);
         if (res?.error) {
-          setStatus(document.getElementById("signupStatus"), res.error, true);
+          setStatus(document.getElementById('signupStatus'), res.error, true);
           return;
         }
         const loginRes = await login(email, password);
@@ -266,19 +208,19 @@
           window.location.href = (loginRes.role === "admin" || loginRes.role === "owner" || loginRes.role === "treasury" || loginRes.role === "staff")
             ? "/admin-dashboard.html" : "/tenant-dashboard.html";
         } else {
-          setStatus(document.getElementById("signupStatus"), loginRes?.error || "Signup completed. Please login.");
+          setStatus(document.getElementById('signupStatus'), loginRes?.error || "Signup completed. Please log in.", true);
         }
       } catch (e) {
         console.error(e);
-        setStatus(document.getElementById("signupStatus"), "Signup error");
+        setStatus(document.getElementById('signupStatus'), "Signup error", true);
       }
     });
 
-    document.getElementById("btnLogin").addEventListener("click", async () => {
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
       if (!email || !password) {
-        setStatus(document.getElementById("loginStatus"), "Please enter email and password.");
+        setStatus(document.getElementById('loginStatus'), "Please enter email and password.", true);
         return;
       }
       try {
@@ -291,13 +233,14 @@
           window.location.href = (["admin","owner","treasury","staff"].includes(data.role))
             ? "/admin-dashboard.html" : "/tenant-dashboard.html";
         } else {
-          setStatus(document.getElementById("loginStatus"), data?.error || "Login failed");
+          setStatus(document.getElementById('loginStatus'), data?.error || "Login failed", true);
         }
       } catch (e) {
         console.error(e);
-        setStatus(document.getElementById("loginStatus"), "Login error");
+        setStatus(document.getElementById('loginStatus'), "Login error", true);
       }
     });
+
   </script>
 </body>
 </html>
