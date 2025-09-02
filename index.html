@@ -1,10 +1,12 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Uniquity Solutions — Public Landing</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uniquity Solutions — Trusted Payments for 20+ Years</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=8">
   <style>
     :root {
       --bg: #96A3B1;
@@ -12,9 +14,7 @@
       --muted: #4b5563;
       --card: #ffffff;
       --primary: #e94b4b;
-      --accent: #fbbf24;
       --shadow: 0 6px 20px rgba(0,0,0,.04);
-      --radius: 12px;
       --nav-h: 56px;
     }
     * { box-sizing: border-box; }
@@ -36,30 +36,72 @@
     .auth-form { display:flex; flex-direction:column; gap:10px; }
     input, button { font:inherit; }
     .input { padding:12px; border:1px solid #ddd; border-radius:8px; width:100%; }
+    .input.invalid { border-color: #e11; box-shadow: 0 0 0 4px rgba(225, 0, 0, 0.15); }
+    .error { color:#e11; font-size:12px; margin-top:2px; }
+    .valid { color:#19a619; font-size:12px; margin-top:2px; }
     .btn { padding:12px 14px; border-radius:8px; border:0; font-weight:700; cursor:pointer; }
     .btn.primary { background: var(--primary); color:#fff; }
-    .btn.secondary { background:#fff; color:var(--primary); border:1px solid var(--primary); }
     .status { min-height:18px; margin-top:6px; font-size:14px; }
 
-    @media (min-width:700px) {
-      .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-    }
+    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width: 600px) { .field-row { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
+  <!-- Navbar (header/menu v8) -->
   <nav class="nav" aria-label="Primary">
-    <div class="nav-inner container">
-      <div class="brand" aria-label="Brand">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span>Uniquity Solutions</span>
+        Uniquity Solutions
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="#services">Services</a>
+        <a href="#partners">Partners</a>
+        <a href="#careers">Careers</a>
+
+        <div class="dropdown" data-dropdown>
+          <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
+            Get Started
+            <svg class="drop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="drop-menu" data-menu role="menu">
+            <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
+            <a href="create-account.html" role="menuitem">Create Account (Merchants)</a>
+            <a href="faq.html" role="menuitem">FAQ</a>
+            <a href="pricing.html" role="menuitem">Pricing</a>
+            <a href="developers.html" role="menuitem">Developers & API</a>
+            <a href="integrations.html" role="menuitem">Integrations</a>
+            <a href="compliance.html" role="menuitem">Compliance & Security</a>
+            <a href="login.html" role="menuitem">Login Portal</a>
+          </div>
+        </div>
+        <a href="#contact" class="cta">Contact</a>
       </div>
+
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </nav>
 
-  <section class="container" id="home" aria-label="Public Landing">
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation" style="display:none;"></div>
+
+  <!-- Page content: Signup + Login with validation (as requested) -->
+  <section class="container" id="home" aria-label="Public Landing" style="padding-top:24px;">
     <div class="hero" aria-label="Intro">
-      <h1 style="margin:0 0 8px; font-size: clamp(22px, 6vw, 40px); color:#1f2937;">Uniquity Solutions — Trusted Payments for 20+ Years</h1>
-      <p class="lead" style="margin:0;">Sign up or sign in. Your session will be linked to a tenant and you’ll access a dashboard scoped to your tenant and role. Stripe onboarding can be toggled per tenant and enabled later.</p>
+      <h1 style="margin:0 0 8px; font-size: clamp(22px, 6vw, 40px); color:#1f2937;">
+        Uniquity Solutions — Trusted Payments for 20+ Years
+      </h1>
+      <p class="lead" style="margin:0;">
+        Sign up or sign in. Your session will be linked to a tenant and you’ll access a dashboard scoped to your tenant and role. Stripe onboarding can be toggled per tenant and enabled later.
+      </p>
     </div>
 
     <div class="auth-wrap" aria-label="Signup and Login" style="margin-top:6px;">
@@ -67,17 +109,35 @@
       <section aria-label="Signup" style="width:100%; max-width:520px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:var(--shadow);">
         <h2 style="font-size:14px; text-transform:uppercase; color:#64748b; margin:0 0 8px;">Create Account</h2>
         <form id="signup-form" class="auth-form" autocomplete="on" style="display:grid; grid-template-columns:1fr; gap:12px;">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <input id="signupEmail" class="input" type="email" placeholder="Email" required />
-            <input id="signupPassword" class="input" type="password" placeholder="Password" required />
+          <div class="field-row">
+            <div>
+              <input id="signupEmail" class="input" type="email" placeholder="Email" required />
+              <div class="error" id="signupEmailError" aria-live="polite"></div>
+            </div>
+            <div>
+              <input id="signupPassword" class="input" type="password" placeholder="Password" required />
+              <div class="error" id="signupPasswordError" aria-live="polite"></div>
+            </div>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <input id="signupCompany" class="input" type="text" placeholder="Company name (tenant)" required />
-            <input id="signupPhone" class="input" type="tel" placeholder="Phone (optional)" />
+          <div class="field-row">
+            <div>
+              <input id="signupCompany" class="input" type="text" placeholder="Company name (tenant)" required />
+              <div class="error" id="signupCompanyError" aria-live="polite"></div>
+            </div>
+            <div>
+              <input id="signupPhone" class="input" type="tel" placeholder="Phone (optional)" />
+              <div class="error" id="signupPhoneError" aria-live="polite"></div>
+            </div>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <input id="signupDOB" class="input" type="date" placeholder="DOB" />
-            <input id="signupAddress" class="input" type="text" placeholder="Address" />
+          <div class="field-row">
+            <div>
+              <input id="signupDOB" class="input" type="date" placeholder="DOB" />
+              <div class="error" id="signupDOBError" aria-live="polite"></div>
+            </div>
+            <div>
+              <input id="signupAddress" class="input" type="text" placeholder="Address" />
+              <div class="error" id="signupAddressError" aria-live="polite"></div>
+            </div>
           </div>
           <label style="display:flex; align-items:center; gap:8px;">
             <input id="enableStripeOnboard" type="checkbox" />
@@ -88,7 +148,7 @@
         </form>
       </section>
 
-      <!-- Distinct Login Card -->
+      <!-- Full Login Card -->
       <section aria-label="Login" style="width:100%; max-width:520px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:var(--shadow);">
         <h2 style="font-size:14px; text-transform:uppercase; color:#64748b; margin:0 0 8px;">Login</h2>
         <form id="login-form" class="auth-form" autocomplete="on" style="display:grid; grid-template-columns:1fr; gap:12px;">
@@ -101,9 +161,13 @@
     </div>
   </section>
 
+  <!-- Supabase: load client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <!-- Env values: SUPABASE_URL and SUPABASE_ANON_KEY -->
   <script src="/env.js"></script>
-  <script>
+
+  <script type="module">
+    // Initialize Supabase client
     const SUPABASE_URL = window.SUPABASE_URL;
     const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
     const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -114,109 +178,218 @@
       el.textContent = msg;
       el.style.color = isError ? '#e11' : '#1e40af';
     }
-
-    // Signup flow
-    async function signup(email, password, company, onboard) {
-      // 1) Upsert/find tenant
-      let tenant_id = null;
-      const { data: existing } = await supabase.from("public.companies").select("id").eq("name", company).maybeSingle();
-      if (existing?.id) {
-        tenant_id = existing.id;
-      } else {
-        const slug = company.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
-        const { data: newComp } = await supabase.from("public.companies").insert({ name: company, slug }).select("id").maybeSingle();
-        tenant_id = newComp?.id || null;
-      }
-
-      // 2) Sign up user via Auth
-      const { user, error } = await supabase.auth.signUp({ email, password });
-      if (error) return { error: error.message };
-
-      // 3) Map user to tenant
-      await supabase.from("public.users").insert({ email, tenant_id, role: "tenant-user" }).maybeSingle();
-
-      // 4) Get session token
-      const session = await supabase.auth.getSession();
-      const token = session?.data?.session?.access_token ?? null;
-      return { user_id: user?.id ?? null, tenant_id, role: "tenant-user", token, onboarding_complete: !!onboard };
+    function clearStatus(el) {
+      if (!el) return;
+      el.textContent = '';
     }
 
-    // Login flow
+    // Basic validation helpers
+    function isEmailValid(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    function isPasswordStrong(pw) {
+      return /(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(pw);
+    }
+
+    // Validation for signup fields
+    function validateSignupForm() {
+      let ok = true;
+      const email = document.getElementById("signupEmail");
+      const emailErr = document.getElementById("signupEmailError");
+      if (!email.value || !isEmailValid(email.value)) {
+        email.classList.add('invalid'); setStatus(emailErr, 'Enter a valid email.'); ok = false;
+      } else { email.classList.remove('invalid'); clearStatus(emailErr); }
+
+      const pw = document.getElementById("signupPassword");
+      const pwErr = document.getElementById("signupPasswordError");
+      if (!pw.value || !isPasswordStrong(pw.value)) {
+        pw.classList.add('invalid'); setStatus(pwErr, 'Password must be 8+ chars with upper, lower, number.'); ok = false;
+      } else { pw.classList.remove('invalid'); clearStatus(pwErr); }
+
+      const company = document.getElementById("signupCompany");
+      const compErr = document.getElementById("signupCompanyError");
+      if (!company.value) { company.classList.add('invalid'); setStatus(compErr, 'Company name is required.'); ok = false; }
+      else { company.classList.remove('invalid'); clearStatus(compErr); }
+
+      // Optional: phone, dob, address basic checks
+      const phone = document.getElementById("signupPhone");
+      const phoneErr = document.getElementById("signupPhoneError");
+      if (phone.value && !/^[\d\s()+-]+$/.test(phone.value)) {
+        phone.classList.add('invalid'); setStatus(phoneErr, 'Phone contains invalid characters.'); ok = false;
+      } else { phone.classList.remove('invalid'); clearStatus(phoneErr); }
+
+      const dob = document.getElementById("signupDOB");
+      const dobErr = document.getElementById("signupDOBError");
+      if (dob.value && !/^\d{4}-\d{2}-\d{2}$/.test(dob.value)) {
+        dob.classList.add('invalid'); setStatus(dobErr, 'DOB should be YYYY-MM-DD.'); ok = false;
+      } else { dob.classList.remove('invalid'); clearStatus(dobErr); }
+
+      const addr = document.getElementById("signupAddress");
+      const addrErr = document.getElementById("signupAddressError");
+      if (addr.value && addr.value.trim().length < 2) {
+        addr.classList.add('invalid'); setStatus(addrErr, 'Address looks too short.'); ok = false;
+      } else { addr.classList.remove('invalid'); clearStatus(addrErr); }
+
+      return ok;
+    }
+
+    // Validation for login
+    function validateLoginForm() {
+      const email = document.getElementById("loginEmail");
+      const pw = document.getElementById("loginPassword");
+      const loginStatus = document.getElementById("loginStatus");
+      let ok = true;
+      if (!email.value || !isEmailValid(email.value)) {
+        email.classList.add('invalid'); setStatus(loginStatus, 'Enter a valid email.'); ok = false;
+      } else { email.classList.remove('invalid'); clearStatus(loginStatus); }
+
+      if (!pw.value || !isPasswordStrong(pw.value)) {
+        pw.classList.add('invalid'); setStatus(loginStatus, 'Password must be 8+ chars with upper, lower, number.'); ok = false;
+      } else { pw.classList.remove('invalid'); clearStatus(loginStatus); }
+
+      return ok;
+    }
+
+    // Upsert tenant (create if missing)
+    async function upsertTenant(tenantName) {
+      const { data: t } = await supabase.from('public.tenants').select('id').eq('name', tenantName).maybeSingle();
+      if (t?.id) return { tenant_id: t.id };
+      const { data: newTenant } = await supabase.from('public.tenants').insert({ name: tenantName, express_connected: false }).select('id').maybeSingle();
+      return { tenant_id: newTenant?.id ?? null };
+    }
+
+    // Signup
+    async function signup(email, password, tenantName, role = 'tenant-user', profile = {}) {
+      const { tenant_id } = await upsertTenant(tenantName);
+      if (!tenant_id) throw new Error('Could not create/find tenant');
+
+      const { user, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw new Error(error.message);
+
+      await supabase.from('public.tenant_users').insert({ tenant_id, user_id: user.id, role, permissions: {} }).select('id').maybeSingle();
+
+      // Optional: store profile
+      if (profile && (profile.phone || profile.dob || profile.address)) {
+        await supabase.from('public.user_profiles').insert({
+          user_id: user.id,
+          phone: profile.phone || null,
+          dob: profile.dob || null,
+          address: profile.address || null
+        }).select('id').maybeSingle();
+      }
+
+      const { data: session } = await supabase.auth.getSession();
+      return { user_id: user.id, tenant_id, role, token: session?.data?.session?.access_token ?? null };
+    }
+
+    // Login
     async function login(email, password) {
       const { data: session, error } = await supabase.auth.signIn({ email, password });
-      if (error) return { error: error.message };
+      if (error) throw new Error(error.message);
 
-      const { data: userRow } = await supabase.from("public.users").select("id as user_id, tenant_id, role").eq("email", email).maybeSingle();
-      const user_id = userRow?.user_id ?? session?.user?.id ?? null;
+      const { data: userRow } = await supabase.from('public.users').select('id, tenant_id').eq('email', email).maybeSingle();
+      const user_id = userRow?.id ?? null;
       const tenant_id = userRow?.tenant_id ?? null;
-      const role = userRow?.role ?? "tenant-user";
 
-      const token = session?.access_token ?? null;
-      return { token, user_id, tenant_id, role };
+      const { data: tu } = await supabase.from('public.tenant_users').select('role').eq('user_id', user_id).eq('tenant_id', tenant_id).maybeSingle();
+      const role = tu?.role ?? 'tenant-user';
+      return { token: session?.access_token ?? null, user_id, tenant_id, role };
     }
 
-    // Handlers
+    // Event handlers
     document.getElementById("btnSignup").addEventListener("click", async () => {
-      const email = document.getElementById("signupEmail").value;
-      const password = document.getElementById("signupPassword").value;
-      const company = document.getElementById("signupCompany").value;
-      const phone = document.getElementById("signupPhone")?.value || "";
-      const dob = document.getElementById("signupDOB")?.value || "";
-      const address = document.getElementById("signupAddress")?.value || "";
-      const onboard = document.getElementById("enableStripeOnboard").checked;
+      const signupStatus = document.getElementById("signupStatus");
+      setStatus(signupStatus, "", false);
 
-      if (!email || !password || !company) {
-        setStatus(document.getElementById("signupStatus"), "Please fill Email, Password, and Company.", true);
+      if (!validateSignupForm()) {
+        setStatus(signupStatus, "Please fix the highlighted fields.", true);
         return;
       }
+
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+      const tenantName = document.getElementById("signupCompany").value;
+      const phone = document.getElementById("signupPhone").value;
+      const dob = document.getElementById("signupDOB").value;
+      const address = document.getElementById("signupAddress").value;
+      const onboard = document.getElementById("enableStripeOnboard").checked;
+
       try {
-        const res = await signup(email, password, company, onboard);
+        const res = await signup(email, password, tenantName, 'tenant-user', { phone, dob, address, onboard });
         if (res?.error) {
-          setStatus(document.getElementById("signupStatus"), res.error, true);
+          setStatus(signupStatus, res.error, true);
           return;
         }
-        const loginRes = await login(email, password);
-        if (loginRes?.token) {
-          localStorage.setItem("token", loginRes.token);
-          localStorage.setItem("user_id", loginRes.user_id);
-          localStorage.setItem("tenant_id", loginRes.tenant_id);
-          localStorage.setItem("role", loginRes.role);
-          window.location.href = (loginRes.role === "admin" || loginRes.role === "owner" || loginRes.role === "treasury" || loginRes.role === "staff")
-            ? "/admin-dashboard.html" : "/tenant-dashboard.html";
-        } else {
-          setStatus(document.getElementById("signupStatus"), loginRes?.error || "Signup completed. Please login.", true);
-        }
+
+        // Sign in to obtain token and redirect
+        const { data: session, error: loginError } = await supabase.auth.signIn({ email, password });
+        if (loginError) throw new Error(loginError.message);
+
+        const token = session?.access_token ?? null;
+        if (token) localStorage.setItem("token", token);
+
+        // Fetch IDs to set localStorage
+        const { data: userRow } = await supabase.from('public.users').select('id, tenant_id').eq('email', email).maybeSingle();
+        const user_id = userRow?.id ?? res.user_id;
+        const tenant_id = userRow?.tenant_id ?? res.tenant_id;
+
+        if (user_id) localStorage.setItem("user_id", user_id);
+        if (tenant_id) localStorage.setItem("tenant_id", tenant_id);
+
+        // Role
+        const { data: tu } = await supabase.from('public.tenant_users').select('role').eq('user_id', user_id).eq('tenant_id', tenant_id).maybeSingle();
+        const role = tu?.role ?? 'tenant-user';
+        localStorage.setItem("role", role);
+
+        const redirectPath = (role === 'admin' || role === 'owner' || role === 'treasury' || role === 'staff')
+          ? '/admin-dashboard.html'
+          : '/tenant-dashboard.html';
+        window.location.href = redirectPath;
       } catch (e) {
-        console.error(e);
-        setStatus(document.getElementById("signupStatus"), "Signup error", true);
+        setStatus(signupStatus, String(e), true);
       }
     });
 
     document.getElementById("btnLogin").addEventListener("click", async () => {
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      if (!email || !password) {
-        setStatus(document.getElementById("loginStatus"), "Please enter email and password.", true);
+      const loginStatus = document.getElementById("loginStatus");
+      setStatus(loginStatus, "", false);
+
+      if (!validateLoginForm()) {
+        setStatus(loginStatus, "Please fix the highlighted fields.", true);
         return;
       }
+
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+
       try {
-        const data = await login(email, password);
-        if (data?.token) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("user_id", data.user_id);
-          localStorage.setItem("tenant_id", data.tenant_id);
-          localStorage.setItem("role", data.role);
-          window.location.href = (["admin","owner","treasury","staff"].includes(data.role))
-            ? "/admin-dashboard.html" : "/tenant-dashboard.html";
+        const res = await login(email, password);
+        if (res?.token) {
+          localStorage.setItem("token", res.token);
+          localStorage.setItem("user_id", res.user_id);
+          localStorage.setItem("tenant_id", res.tenant_id);
+          localStorage.setItem("role", res.role);
+
+          const redirectPath = (res.role === 'admin' || res.role === 'owner' || res.role === 'treasury' || res.role === 'staff')
+            ? '/admin-dashboard.html'
+            : '/tenant-dashboard.html';
+          window.location.href = redirectPath;
         } else {
-          setStatus(document.getElementById("loginStatus"), data?.error || "Login failed", true);
+          setStatus(loginStatus, "Login failed. Please try again.", true);
         }
       } catch (e) {
-        console.error(e);
-        setStatus(document.getElementById("loginStatus"), "Login error", true);
+        setStatus(loginStatus, String(e), true);
       }
     });
+
+    // Optional: auto-redirect if already logged in (on page load)
+    (async () => {
+      try {
+        const { data: { session } } = await (await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js')).default;
+        // If you have a session stored, you can use it to redirect automatically
+        // This is optional and depends on how you want to handle sessions
+      } catch (err) { /* ignore */ }
+    })();
   </script>
 </body>
 </html>
-
