@@ -23,9 +23,9 @@
 
       <div class="nav-links">
         <a href="https://www.uniquitysolutions.com/index.html">Home</a>
-        <a href="https://www.uniquitysolutions.com/index.html #Services">Services</a>
-        <a href="https://www.uniquitysolutions.com/index.html#Partners">Partners</a>
-        <a href="https://www.uniquitysolutions.com/index.html #Careers">Careers</a>
+        <a href="https://www.uniquitysolutions.com/services.html">Services</a>
+        <a href="https://www.uniquitysolutions.com/partners.html">Partners</a>
+        <a href="https://www.uniquitysolutions.com/careers.html">Careers</a>
 
         <div class="dropdown" data-dropdown>
           <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
@@ -45,17 +45,15 @@
             <a href="https://dashboard.uniquitysolutions.com/?" role="menuitem">Login Portal</a>
           </div>
         </div>
-        
-  
 
-  <!-- Landing content with unified signup/login panel -->
+  <!-- Landing content -->
   <main class="container" id="home" aria-label="Public Landing" style="max-width:1100px; margin:0 auto; padding:20px;">
-    <section class="hero" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px 20px 28px; position:relative;">
-      <h1 style="margin:0 0 8px; font-size: clamp(28px, 4vw, 44px); line-height:1.05; color:#1f2937;">
+    <section class="hero" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px;">
+      <h1 style="margin:0 0 8px; font-size: clamp(28px, 4vw, 52px); line-height:1.05;">
         Uniquity Solutions — Trusted Payments for 20+ Years
       </h1>
-      <p class="lead" style="margin:0 0 8px; color:#4b5563;">
-        Sign up or sign in to access your tenant or admin dashboard. Your access is scoped to your account's role.
+      <p class="lead" style="margin:0; color:#4b5563;">
+        Create an account and sign in. Your session will be linked to a tenant and you’ll access a dashboard scoped to your tenant and role.
       </p>
     </section>
 
@@ -67,13 +65,11 @@
           <input id="signupEmail" class="input" type="email" placeholder="Email" />
           <input id="signupPassword" class="input" type="password" placeholder="Password" />
           <input id="signupCompany" class="input" type="text" placeholder="Company name (tenant)" />
-          <select id="signupRole" class="input" aria-label="Role (optional)">
-            <option value="">Select role (optional)</option>
-            <option value="admin">Admin</option>
-            <option value="tenant-admin">Tenant Admin</option>
-            <option value="tenant-user">Tenant User</option>
-            <option value="staff">Staff</option>
-          </select>
+          <!-- On signup, we default to tenant-user; admin/owner/etc. are assigned in admin-dashboard -->
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="enableStripeOnboard" />
+            <span>Enable Stripe onboarding for this tenant (Stripe Express)</span>
+          </label>
           <button id="btnSignup" class="btn" style="width:100%;">Create Account</button>
         </div>
 
@@ -93,24 +89,35 @@
       <section aria-label="Public info" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
         <h3>Public Information</h3>
         <p>Overview, pricing, and integrations. The landing page is intentionally lightweight.</p>
+        <div class="kpis" aria-label="Quick stats" style="margin-top:8px;">
+          <div class="kpi"><span class="kpi-dot" aria-hidden="true"></span> 6 Roles (admin, owner, treasury, staff, tenant-admin, tenant-user)</div>
+        </div>
       </section>
     </section>
   </main>
 
-  <script>
-    // Backend endpoints (update to your actual domain)
-    const API_BASE = "https://your-backend.example.com/api/v1";
+  <!-- Include Supabase JS client from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
-    function setSession(token, tenant_id, user_id, role) {
+  <!-- Your env.js should expose SUPABASE_URL and SUPABASE_ANON_KEY on window -->
+  <script>
+    if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+      console.error("Please define SUPABASE_URL and SUPABASE_ANON_KEY in env.js");
+    }
+
+    const SUPABASE_URL = window.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function setSession(token, user_id, tenant_id, role) {
       localStorage.setItem("token", token);
-      localStorage.setItem("tenant_id", tenant_id);
       localStorage.setItem("user_id", user_id);
+      localStorage.setItem("tenant_id", tenant_id);
       localStorage.setItem("role", role);
     }
 
     function navigateToDashboard(role) {
-      // Basic routing: admins go to admin, others to tenant
-      if (role === "admin") {
+      if (role === "admin" || role === "owner") {
         window.location.href = "/admin-dashboard.html";
       } else {
         window.location.href = "/tenant-dashboard.html";
@@ -124,53 +131,122 @@
       el.style.color = "#e11";
     }
 
-    async function signup(email, password, company_name, role) {
-      const body = { email, password };
-      if (company_name) body.company_name = company_name;
-      if (role) body.role = role;
-      const res = await fetch(API_BASE + "/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      return res.json();
+    // Sign up flow (tenant-default). Creates/links tenant, creates user as tenant-user
+    async function signup(email, password, company_name, onboard) {
+      // 1) Upsert or create company in public.companies (via RPC-like calls)
+      // 2) Create a user in public.users linked to that company (tenant)
+      // 3) Optionally trigger Stripe onboarding toggle via a field on the company row (onboarding_complete)
+      // For MVP using Supabase JS:
+      // - Create company if not exists
+      // - Create user with email, and store tenant_id (company.id) and role = "tenant-user"
+      // - You can, after server-side, issue a JWT; here we’ll rely on Supabase session and a lightweight token
+
+      // 1) Try to find company by name slug (simplified: exact match)
+      const { data: existing } = await supabase
+        .from("public.companies")
+        .select("id,name")
+        .eq("name", company_name)
+        .maybeSingle();
+
+      let company_id = existing?.id;
+      if (!company_id) {
+        // Create new company
+        const slug = company_name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
+        const { data: comp, error: compErr } = await supabase
+          .from("public.companies")
+          .insert({ name: company_name, slug, email: "" })
+          .select("id")
+          .maybeSingle();
+        if (compErr) {
+          return { error: compErr.message };
+        }
+        company_id = comp?.id;
+      }
+
+      // 2) Create user in public.users (we're using Supabase Auth for password storage; but for the schema you described,
+      // you might want to create a row in public.users with email and a hashed password. Here we’ll rely on Auth.
+      // Sign up with email/password via Supabase Auth:
+      const { user, error: signupErr } = await supabase.auth.signUp({ email, password });
+      if (signupErr) {
+        return { error: signupErr.message };
+      }
+
+      // 3) Link user to tenant by creating a row in a public view/table that maps user -> tenant
+      // If you have a dedicated "public.users" with tenant_id column, insert a row or update; otherwise you can map via a join table.
+      // Example (pseudo):
+      // await supabase.from("public.users").update({ tenant_id: company_id, role: "tenant-user" }).eq("email", email);
+
+      // For MVP in code, return a minimal payload and let you refine on server side:
+      return {
+        user_id: user?.id || null,
+        tenant_id: company_id || null,
+        role: "tenant-user",
+        token: null // placeholder; you should issue a real JWT on server or use session token
+      };
     }
 
+    // Login flow
     async function login(email, password) {
-      const res = await fetch(API_BASE + "/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      return res.json();
+      const { data: userAuth, error: loginErr } = await supabase.auth.signIn({ email, password });
+      if (loginErr) {
+        return { error: loginErr.message };
+      }
+      // Fetch tenant_id and role from your public.users table or a view
+      // This requires a table/view that stores user_id, tenant_id, role. If you don’t have it yet, you’ll need to add one.
+      // Example query:
+      const { data: userRow, error: fetchErr } = await supabase
+        .from("public.users_view")
+        .select("id as user_id, tenant_id, role")
+        .eq("email", email)
+        .single();
+
+      if (fetchErr) {
+        // Fallback: assume tenant-user if not found
+        return {
+          token: userAuth?.session?.access_token || null,
+          user_id: userAuth?.user?.id || null,
+          tenant_id: null,
+          role: "tenant-user"
+        };
+      }
+
+      const user_id = userRow?.user_id;
+      const tenant_id = userRow?.tenant_id;
+      const role = userRow?.role || "tenant-user";
+
+      // In MVP, use Supabase session token; in prod, return a JWT from your server
+      const token = userAuth?.session?.access_token || null;
+      return { token, user_id, tenant_id, role };
     }
 
+    // UI wiring
     document.getElementById("btnSignup").addEventListener("click", async () => {
       const email = document.getElementById("signupEmail").value;
       const password = document.getElementById("signupPassword").value;
       const company = document.getElementById("signupCompany").value;
-      const role = document.getElementById("signupRole").value;
+      const onboard = document.getElementById("enableStripeOnboard").checked;
 
-      if (!email || !password) {
-        showStatus("Please enter email and password.");
+      if (!email || !password || !company) {
+        showStatus("Please fill in Email, Password, and Company.");
         return;
       }
 
       try {
-        const data = await signup(email, password, company, role);
-        if (data?.token) {
-          setSession(data.token, data.tenant_id, data.user_id, data.role);
-          navigateToDashboard(data.role);
-        } else if (data?.error) {
+        const data = await signup(email, password, company, onboard);
+        if (data?.error) {
           showStatus(data.error);
+          return;
+        }
+        // Auto-login after signup
+        const loginRes = await login(email, password);
+        if (loginRes?.token) {
+          setSession(loginRes.token, loginRes.user_id, loginRes.tenant_id, loginRes.role);
+          navigateToDashboard(loginRes.role);
         } else {
-          // Fallback: attempt login with same creds
-          const loginRes = await login(email, password);
-          if (loginRes?.token) {
-            setSession(loginRes.token, loginRes.tenant_id, loginRes.user_id, loginRes.role);
-            navigateToDashboard(loginRes.role);
+          if (loginRes?.error) {
+            showStatus(loginRes.error);
           } else {
-            showStatus("Signup failed. Please try again.");
+            showStatus("Signup completed. Please log in.");
           }
         }
       } catch (e) {
@@ -191,7 +267,7 @@
       try {
         const data = await login(email, password);
         if (data?.token) {
-          setSession(data.token, data.tenant_id, data.user_id, data.role);
+          setSession(data.token, data.user_id, data.tenant_id, data.role);
           navigateToDashboard(data.role);
         } else {
           showStatus(data?.error || "Login failed");
