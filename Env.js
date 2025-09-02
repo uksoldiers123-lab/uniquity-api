@@ -1,6 +1,6 @@
 window.ALLOWED_ORIGINS= https://uniquitysolutions.com,https://dashboard.uniquitysolutions.com 
 window.APP_BASE_URL = "https://dashboard.uniquitysolutions.com";
-window.NEXT_PUBLIC_SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co"; // Corrected
+window.SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co"; // Corrected
 window.PORT = "10000"; // Port Render assigns
 window.REACT_APP_SUPABASE_KEY = "sb_publishable_nlnBWEaRycn4fHAMBf26Vw_Gu8TwcZ3"; // Ensure to use correct key
 window.REACT_APP_SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co";
