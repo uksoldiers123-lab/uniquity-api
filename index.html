@@ -1,9 +1,10 @@
 <!doctype html>
+
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Uniquity Solutions — Trusted Payments for 20+ Years</title>
+  <title>Uniquity Solutions — Public Landing</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=8">
@@ -31,14 +32,8 @@
     .auth-wrap { display:flex; justify-content:center; padding: 8px; }
     .auth-card { width:100%; max-width: 520px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow: var(--shadow); }
 
-    .auth-tabs { display:flex; border-bottom:1px solid #eee; margin-bottom:8px; }
-    .auth-tabs button { flex:1; padding:12px; border:0; background:#fff; font-weight:700; cursor: pointer; }
     .auth-form { display:flex; flex-direction:column; gap:10px; }
-    input, button { font:inherit; }
-    .input { padding:12px; border:1px solid #ddd; border-radius:8px; width:100%; }
-    .input.invalid { border-color: #e11; box-shadow: 0 0 0 4px rgba(225, 0, 0, 0.15); }
-    .error { color:#e11; font-size:12px; margin-top:2px; }
-    .valid { color:#19a619; font-size:12px; margin-top:2px; }
+    .input { font:inherit; padding:12px; border:1px solid #ddd; border-radius:8px; width:100%; }
     .btn { padding:12px 14px; border-radius:8px; border:0; font-weight:700; cursor:pointer; }
     .btn.primary { background: var(--primary); color:#fff; }
     .status { min-height:18px; margin-top:6px; font-size:14px; }
@@ -81,7 +76,7 @@
           </div>
         </div>
 
-        <a href="#contact" class="cta">Contact</a>
+        <a href="./public/client-dashboard.html" class="cta">Client Dashboard</a>
       </div>
 
       <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
@@ -106,40 +101,40 @@
     </div>
 
     <div class="auth-wrap" aria-label="Signup and Login" style="margin-top:6px;">
-      <!-- Sign Up Form -->
+      <!-- Sign Up -->
       <section aria-label="Signup" style="width:100%; max-width:520px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:var(--shadow);">
         <h2 style="font-size:14px; text-transform:uppercase; color:#64748b; margin:0 0 8px;">Create Account</h2>
         <form id="signup-form" class="auth-form" autocomplete="on" style="display:grid; grid-template-columns:1fr; gap:12px;">
           <div class="field-row">
             <div>
               <input id="signupEmail" class="input" type="email" placeholder="Email" required />
-              <div class="error" id="signupEmailError" aria-live="polite"></div>
+              <div class="status" id="signupEmailError" aria-live="polite"></div>
             </div>
             <div>
               <input id="signupPassword" class="input" type="password" placeholder="Password" required />
-              <div class="error" id="signupPasswordError" aria-live="polite"></div>
+              <div class="status" id="signupPasswordError" aria-live="polite"></div>
             </div>
           </div>
 
           <div class="field-row">
             <div>
               <input id="signupTenant" class="input" type="text" placeholder="Tenant name" required />
-              <div class="error" id="signupTenantError" aria-live="polite"></div>
+              <div class="status" id="signupTenantError" aria-live="polite"></div>
             </div>
             <div>
               <input id="signupPhone" class="input" type="tel" placeholder="Phone (optional)" />
-              <div class="error" id="signupPhoneError" aria-live="polite"></div>
+              <div class="status" id="signupPhoneError" aria-live="polite"></div>
             </div>
           </div>
 
           <div class="field-row">
             <div>
               <input id="signupDOB" class="input" type="date" placeholder="DOB" />
-              <div class="error" id="signupDOBError" aria-live="polite"></div>
+              <div class="status" id="signupDOBError" aria-live="polite"></div>
             </div>
             <div>
               <input id="signupAddress" class="input" type="text" placeholder="Address" />
-              <div class="error" id="signupAddressError" aria-live="polite"></div>
+              <div class="status" id="signupAddressError" aria-live="polite"></div>
             </div>
           </div>
 
@@ -153,7 +148,7 @@
         </form>
       </section>
 
-      <!-- Login Form -->
+      <!-- Login -->
       <section aria-label="Login" style="width:100%; max-width:520px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:var(--shadow);">
         <h2 style="font-size:14px; text-transform:uppercase; color:#64748b; margin:0 0 8px;">Login</h2>
         <form id="login-form" class="auth-form" autocomplete="on" style="display:grid; grid-template-columns:1fr; gap:12px;">
@@ -169,88 +164,57 @@
   <!-- Supabase: load client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <!-- Env values -->
-  <script src="/env.js"></script>
+  <script src="./public/env.js"></script>
 
   <script type="module">
     const SUPABASE_URL = window.SUPABASE_URL;
     const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
     const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Helpers
     function setStatus(el, msg, isError = true) {
       if (!el) return;
       el.textContent = msg;
       el.style.color = isError ? '#e11' : '#1e40af';
     }
-    function clearStatus(el) {
-      if (!el) return;
-      el.textContent = '';
-    }
-    function isEmailValid(email) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-    function isPasswordStrong(pw) {
-      return /(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(pw);
-    }
+    function clearStatus(el){ if (el) el.textContent = ''; }
+
+    function isEmailValid(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+    function isPasswordStrong(pw) { return /(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(pw); }
 
     // Validation
     function validateSignupForm() {
       let ok = true;
-      const email = document.getElementById("signupEmail");
-      const emailErr = document.getElementById("signupEmailError");
-      if (!email.value || !isEmailValid(email.value)) {
-        email.classList.add('invalid'); setStatus(emailErr, 'Enter a valid email.'); ok = false;
-      } else { email.classList.remove('invalid'); clearStatus(emailErr); }
+      const email = document.getElementById("signupEmail"); const emailErr = document.getElementById("signupEmailError");
+      if (!email.value || !isEmailValid(email.value)) { email.classList.add('invalid'); setStatus(emailErr, 'Enter a valid email.'); ok = false; } else { email.classList.remove('invalid'); clearStatus(emailErr); }
 
-      const pw = document.getElementById("signupPassword");
-      const pwErr = document.getElementById("signupPasswordError");
-      if (!pw.value || !isPasswordStrong(pw.value)) {
-        pw.classList.add('invalid'); setStatus(pwErr, 'Password must be 8+ chars with upper, lower, number.'); ok = false;
-      } else { pw.classList.remove('invalid'); clearStatus(pwErr); }
+      const pw = document.getElementById("signupPassword"); const pwErr = document.getElementById("signupPasswordError");
+      if (!pw.value || !isPasswordStrong(pw.value)) { pw.classList.add('invalid'); setStatus(pwErr, 'Password must be 8+ chars with upper, lower, number.'); ok = false; } else { pw.classList.remove('invalid'); clearStatus(pwErr); }
 
-      const tenant = document.getElementById("signupTenant");
-      const tenantErr = document.getElementById("signupTenantError");
-      if (!tenant.value) { tenant.classList.add('invalid'); setStatus(tenantErr, 'Tenant name is required.'); ok = false; }
-      else { tenant.classList.remove('invalid'); clearStatus(tenantErr); }
+      const tenant = document.getElementById("signupTenant"); const tenantErr = document.getElementById("signupTenantError");
+      if (!tenant.value) { tenant.classList.add('invalid'); setStatus(tenantErr, 'Tenant name is required.'); ok = false; } else { tenant.classList.remove('invalid'); clearStatus(tenantErr); }
 
-      const phone = document.getElementById("signupPhone");
-      const phoneErr = document.getElementById("signupPhoneError");
-      if (phone.value && !/^[\d\s()+-]+$/.test(phone.value)) {
-        phone.classList.add('invalid'); setStatus(phoneErr, 'Phone contains invalid characters.'); ok = false;
-      } else { phone.classList.remove('invalid'); clearStatus(phoneErr); }
+      const phone = document.getElementById("signupPhone"); const phoneErr = document.getElementById("signupPhoneError");
+      if (phone.value && !/^[\d\s()+-]+$/.test(phone.value)) { phone.classList.add('invalid'); setStatus(phoneErr, 'Phone contains invalid characters.'); ok = false; } else { phone.classList.remove('invalid'); clearStatus(phoneErr); }
 
-      const dob = document.getElementById("signupDOB");
-      const dobErr = document.getElementById("signupDOBError");
-      if (dob.value && !/^\d{4}-\d{2}-\d{2}$/.test(dob.value)) {
-        dob.classList.add('invalid'); setStatus(dobErr, 'DOB should be YYYY-MM-DD.'); ok = false;
-      } else { dob.classList.remove('invalid'); clearStatus(dobErr); }
+      const dob = document.getElementById("signupDOB"); const dobErr = document.getElementById("signupDOBError");
+      if (dob.value && !/^\d{4}-\d{2}-\d{2}$/.test(dob.value)) { dob.classList.add('invalid'); setStatus(dobErr, 'DOB should be YYYY-MM-DD.'); ok = false; } else { dob.classList.remove('invalid'); clearStatus(dobErr); }
 
-      const addr = document.getElementById("signupAddress");
-      const addrErr = document.getElementById("signupAddressError");
-      if (addr.value && addr.value.trim().length < 2) {
-        addr.classList.add('invalid'); setStatus(addrErr, 'Address looks too short.'); ok = false;
-      } else { addr.classList.remove('invalid'); clearStatus(addrErr); }
+      const addr = document.getElementById("signupAddress"); const addrErr = document.getElementById("signupAddressError");
+      if (addr.value && addr.value.trim().length < 2) { addr.classList.add('invalid'); setStatus(addrErr, 'Address looks too short.'); ok = false; } else { addr.classList.remove('invalid'); clearStatus(addrErr); }
 
       return ok;
     }
 
     function validateLoginForm() {
-      const email = document.getElementById("loginEmail");
-      const pw = document.getElementById("loginPassword");
+      const email = document.getElementById("loginEmail"); const pw = document.getElementById("loginPassword");
       const loginStatus = document.getElementById("loginStatus");
       let ok = true;
-      if (!email.value || !isEmailValid(email.value)) {
-        email.classList.add('invalid'); setStatus(loginStatus, 'Enter a valid email.'); ok = false;
-      } else { email.classList.remove('invalid'); clearStatus(loginStatus); }
-
-      if (!pw.value || !isPasswordStrong(pw.value)) {
-        pw.classList.add('invalid'); setStatus(loginStatus, 'Password must be 8+ chars with upper, lower, number.'); ok = false;
-      } else { pw.classList.remove('invalid'); clearStatus(loginStatus); }
-
+      if (!email.value || !isEmailValid(email.value)) { email.classList.add('invalid'); setStatus(loginStatus, 'Enter a valid email.'); ok = false; } else { email.classList.remove('invalid'); clearStatus(loginStatus); }
+      if (!pw.value || !isPasswordStrong(pw.value)) { pw.classList.add('invalid'); setStatus(loginStatus, 'Password must be 8+ chars with upper, lower, number.'); ok = false; } else { pw.classList.remove('invalid'); clearStatus(loginStatus); }
       return ok;
     }
 
-    // 1) Upsert tenant (create if missing)
+    // 1) Upsert tenant
     async function upsertTenant(tenantName) {
       const { data: t } = await supabase.from('public.tenants').select('id').eq('name', tenantName).maybeSingle();
       if (t?.id) return { tenant_id: t.id };
@@ -258,7 +222,7 @@
       return { tenant_id: newTenant?.id ?? null };
     }
 
-    // 2) Signup
+    // 2) Sign-up
     async function signup(email, password, tenantName, role = 'tenant-user', profile = {}) {
       const { tenant_id } = await upsertTenant(tenantName);
       if (!tenant_id) throw new Error('Could not create/find tenant');
@@ -270,10 +234,7 @@
 
       if (profile && (profile.phone || profile.dob || profile.address)) {
         await supabase.from('public.user_profiles').insert({
-          user_id: user.id,
-          phone: profile.phone || null,
-          dob: profile.dob || null,
-          address: profile.address || null
+          user_id: user.id, phone: profile.phone || null, dob: profile.dob || null, address: profile.address || null
         }).select('id').maybeSingle();
       }
 
@@ -299,11 +260,7 @@
     document.getElementById("btnSignup").addEventListener("click", async () => {
       const signupStatus = document.getElementById("signupStatus");
       setStatus(signupStatus, "", false);
-
-      if (!validateSignupForm()) {
-        setStatus(signupStatus, "Please fix the highlighted fields.", true);
-        return;
-      }
+      if (!validateSignupForm()) { setStatus(signupStatus, "Please fix the highlighted fields.", true); return; }
 
       const email = document.getElementById("signupEmail").value;
       const password = document.getElementById("signupPassword").value;
@@ -315,19 +272,16 @@
 
       try {
         const res = await signup(email, password, tenantName, 'tenant-user', { phone, dob, address, onboard });
-        if (res?.error) {
-          setStatus(signupStatus, res.error, true);
-          return;
-        }
+        if (res?.error) { setStatus(signupStatus, res.error, true); return; }
 
-        // Sign in to obtain token
+        // Sign in to get token
         const { data: session, error: loginError } = await supabase.auth.signIn({ email, password });
         if (loginError) throw new Error(loginError.message);
 
         const token = session?.access_token ?? null;
         if (token) localStorage.setItem("token", token);
 
-        // Resolve IDs for storage
+        // Load IDs for storage
         const { data: userRow } = await supabase.from('public.users').select('id, tenant_id').eq('email', email).maybeSingle();
         const user_id = userRow?.id ?? res.user_id;
         const tenant_id = userRow?.tenant_id ?? res.tenant_id;
@@ -340,8 +294,8 @@
         localStorage.setItem("role", role);
 
         const redirectPath = (role === 'admin' || role === 'owner' || role === 'treasury' || role === 'staff')
-          ? '/admin-dashboard.html'
-          : '/tenant-dashboard.html';
+          ? '/public/admin/admin-dashboard.html'
+          : '/public/client-dashboard.html';
         window.location.href = redirectPath;
       } catch (e) {
         setStatus(signupStatus, String(e), true);
@@ -352,11 +306,7 @@
     document.getElementById("btnLogin").addEventListener("click", async () => {
       const loginStatus = document.getElementById("loginStatus");
       setStatus(loginStatus, "", false);
-
-      if (!validateLoginForm()) {
-        setStatus(loginStatus, "Please fix the highlighted fields.", true);
-        return;
-      }
+      if (!validateLoginForm()) { setStatus(loginStatus, "Please fix the highlighted fields.", true); return; }
 
       const email = document.getElementById("loginEmail").value;
       const password = document.getElementById("loginPassword").value;
@@ -370,8 +320,8 @@
           localStorage.setItem("role", res.role);
 
           const redirectPath = (res.role === 'admin' || res.role === 'owner' || res.role === 'treasury' || res.role === 'staff')
-            ? '/admin-dashboard.html'
-            : '/tenant-dashboard.html';
+            ? '/public/admin/admin-dashboard.html'
+            : '/public/client-dashboard.html';
           window.location.href = redirectPath;
         } else {
           setStatus(loginStatus, "Login failed. Please try again.", true);
@@ -380,24 +330,6 @@
         setStatus(loginStatus, String(e), true);
       }
     });
-
-    // Optional: auto-fill live validation hints
-    document.getElementById("signupEmail").addEventListener("input", () => {
-      const el = document.getElementById("signupEmail");
-      const err = document.getElementById("signupEmailError");
-      if (el.value && isEmailValid(el.value)) {
-        el.classList.remove('invalid');
-        clearStatus(err);
-      } else if (el.value) {
-        el.classList.add('invalid');
-        setStatus(err, 'Enter a valid email.');
-      } else {
-        el.classList.remove('invalid');
-        clearStatus(err);
-      }
-    });
   </script>
 </body>
 </html>
-
-
