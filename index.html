@@ -46,43 +46,24 @@
           </div>
         </div>
         
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
 
-  <!-- Your existing CSS (styles.css) -->
-  <link rel="stylesheet" href="styles.css?v=9" />
-</head>
-<body>
-  <!-- Landing header (distinct from admin/client dashboards) -->
-  <nav class="nav" aria-label="Primary">
-    <div class="container nav-inner">
-      <a class="brand" href="index.html">
-        <span class="brand-mark" aria-hidden="true"></span>
-        Uniquity Solutions
-      </a>
-      <div class="nav-links" aria-label="Main navigation">
-        <a href="#home" style="color:#fff; text-decoration:none; margin-right:8px;">Home</a>
-        <a href="#services" style="color:#fff; text-decoration:none; margin-right:8px;">Services</a>
-        <a href="#partners" style="color:#fff; text-decoration:none; margin-right:8px;">Partners</a>
-        <a href="#careers" style="color:#fff; text-decoration:none; margin-right:8px;">Careers</a>
-        <a href="#contact" class="cta" style="color:#fff; text-decoration:none; border:1px solid rgba(255,255,255,.6); padding:8px 12px; border-radius:8px;">Contact</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Landing content with unified auth panel -->
+  <!-- Landing content with unified signup/login panel -->
   <main class="container" id="home" aria-label="Public Landing" style="max-width:1100px; margin:0 auto; padding:20px;">
-    <section class="hero" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px;">
-      <h1>Uniquity Solutions – Trusted Payments for 20+ Years</h1>
-      <p>Sign up or sign in to access your tenant or admin dashboard. Your data and access are scoped to your account's role.</p>
+    <section class="hero" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px 20px 28px; position:relative;">
+      <h1 style="margin:0 0 8px; font-size: clamp(28px, 4vw, 44px); line-height:1.05; color:#1f2937;">
+        Uniquity Solutions — Trusted Payments for 20+ Years
+      </h1>
+      <p class="lead" style="margin:0 0 8px; color:#4b5563;">
+        Sign up or sign in to access your tenant or admin dashboard. Your access is scoped to your account's role.
+      </p>
     </section>
 
     <section class="grid" aria-label="Auth panel" style="display:grid; grid-template-columns:360px 1fr; gap:16px; padding-top:20px;">
       <!-- Left: Unified signup + login -->
-      <aside aria-label="Signup / Login">
+      <aside aria-label="Signup / Login" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
         <div class="section-title" style="margin-bottom:6px;">Create Account</div>
-        <div style="display:grid; gap:8px;">
+        <div class="form" style="display:grid; gap:8px;">
           <input id="signupEmail" class="input" type="email" placeholder="Email" />
           <input id="signupPassword" class="input" type="password" placeholder="Password" />
           <input id="signupCompany" class="input" type="text" placeholder="Company name (tenant)" />
@@ -99,7 +80,7 @@
         <hr style="margin:12px 0;" />
 
         <div class="section-title" style="margin-bottom:6px;">Login</div>
-        <div style="display:grid; gap:8px;">
+        <div class="form" style="display:grid; gap:8px;">
           <input id="loginEmail" class="input" type="email" placeholder="Email" />
           <input id="loginPassword" class="input" type="password" placeholder="Password" />
           <button id="btnLogin" class="btn" style="width:100%;">Login</button>
@@ -108,7 +89,7 @@
         <p id="authStatus" style="color:#e11; display:none; margin-top:8px;"></p>
       </aside>
 
-      <!-- Right column: placeholder for marketing/content -->
+      <!-- Right column: marketing/content -->
       <section aria-label="Public info" style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
         <h3>Public Information</h3>
         <p>Overview, pricing, and integrations. The landing page is intentionally lightweight.</p>
@@ -117,9 +98,7 @@
   </main>
 
   <script>
-    // Config: update to your real backend if you have one; for this drop-in, we’ll route to your Express endpoints
-    // If you want to bypass a backend temporarily and use Supabase directly from the client (not recommended long-term),
-    // you could wire the Supabase JS client here instead.
+    // Backend endpoints (update to your actual domain)
     const API_BASE = "https://your-backend.example.com/api/v1";
 
     function setSession(token, tenant_id, user_id, role) {
@@ -130,9 +109,8 @@
     }
 
     function navigateToDashboard(role) {
-      // Route based on role
-      if (role === "admin" || role === "tenant-admin" && false) {
-        // Adjust: if you want admin to always go admin-dashboard
+      // Basic routing: admins go to admin, others to tenant
+      if (role === "admin") {
         window.location.href = "/admin-dashboard.html";
       } else {
         window.location.href = "/tenant-dashboard.html";
