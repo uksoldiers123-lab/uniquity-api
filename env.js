@@ -1,4 +1,4 @@
-window.ALLOWED_ORIGINS= https://uniquitysolutions.com,https://dashboard.uniquitysolutions.com 
+window.ALLOWED_ORIGINS= https://dashboard.uniquitysolutions.com 
 window.APP_BASE_URL = "https://dashboard.uniquitysolutions.com";
 window.SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co"; // Corrected
 window.PORT = "10000"; // Port Render assigns
