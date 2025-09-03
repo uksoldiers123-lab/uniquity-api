@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -11,12 +12,8 @@
     .btn { background:#e11d48; color:#fff; border:0; font-weight:700; }
     #log { white-space:pre-wrap; font-family:monospace; font-size:12px; min-height:60px; border:1px dashed #e5e7eb; padding:8px; border-radius:8px; }
   </style>
-  <style>
-    /* Inline extra for responsiveness, if desired */
-  </style>
 </head>
 <body>
-
   <div class="card" id="signupCard">
     <h3>Create Account</h3>
     <input id="signupEmail" placeholder="Email" type="email" />
@@ -45,13 +42,15 @@
 
   <!-- Inline keys for testing (replace with secure loading in production) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-  <script>
-    // Replace these with your real keys securely in production.
-    // This is a test stub; do not leave real keys here in production or public repos.
-    window.SUPABASE_URL = "https://ziltrcaehpshkwganlcy.supabase.co";
-    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ6aWx0cmNhZWhwc2hqa3dHZ2FubGMiLCJyZWYiOiJ1c2VyIn0.signature_placeholder";
 
-    const SUPABASE = Supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  <script>
+    // TODO: In production, load these from your hosting environment or a secure vault
+    // Do not commit or expose real keys in public repos
+    const SUPABASE_URL = "https://gifguoyqccozlijrxgcf.supabase.co";
+    const SUPABASE_ANON_KEY = "REPLACE_WITH_YOUR_ANON_KEY_FROM_SUPABASE";
+
+    // Initialize Supabase client
+    const SUPABASE = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function log(m) {
       const el = document.getElementById('log');
@@ -77,7 +76,7 @@
       const onboard = document.getElementById("enableStripeOnboard").checked;
 
       try {
-        // 1) Upsert tenant
+        // 1) Upsert tenant (simplified; adapt to your schema)
         let tenant_id = null;
         const { data: t } = await SUPABASE.from('public.tenants').select('id').eq('name', tenant).maybeSingle();
         if (t?.id) {
@@ -108,16 +107,15 @@
         if (loginErr) throw loginErr;
         log("Signed in; token present: " + (!!session?.access_token));
 
-        // 6) Resolve IDs/role
+        // 6) Resolve IDs/role (basic example)
         const { data: userRow } = await SUPABASE.from('public.users').select('id, tenant_id').eq('email', email).maybeSingle();
         const user_id = userRow?.id;
         const tenant_id = userRow?.tenant_id;
-
         const { data: tu } = await SUPABASE.from('public.tenant_users').select('role').eq('user_id', user_id).eq('tenant_id', tenant_id).maybeSingle();
         const role = tu?.role ?? 'tenant-user';
         log("Resolved role: " + role);
 
-        // 7) Redirect (absolute)
+        // 7) Redirect (absolute) - customize routes as needed
         const redirectPath = (role === 'admin' || role === 'owner' || role === 'treasury' || role === 'staff')
           ? "https://dashboard.uniquitysolutions.com/public/admin/admin-dashboard.html"
           : "https://dashboard.uniquitysolutions.com/public/client-dashboard.html";
@@ -129,7 +127,7 @@
       }
     });
 
-    // Minimal Login (optional, can be implemented similarly)
+    // Minimal Login (optional)
     document.getElementById("btnLogin").addEventListener("click", async () => {
       log("Login clicked");
       const email = document.getElementById("loginEmail").value;
